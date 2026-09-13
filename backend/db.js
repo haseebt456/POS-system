@@ -12,5 +12,6 @@ const dbPath = path.join(__dirname,'data', 'POSdb.db');//--dirname to be check o
 const db = new database(dbPath, { verbose: console.log });  // verbose logs every query — remove later once stable
 
 db.pragma('journal_mode = WAL'); // better concurrency, safer writes — standard for SQLite apps
+db.pragma('foreign_keys = ON');
 
 module.exports = db;
