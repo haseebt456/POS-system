@@ -34,15 +34,15 @@ function createOrder({ order_type, items, created_by }) {
         VALUES (?, ?, 'pending', ?, ?)
     `);
     const insertItem = db.prepare(`
-        INSERT INTO order_items (order_id, menu_item_id, station_id, quantity, unit_price_cents, print_status)
-        VALUES (?, ?, ?, ?, ?, 'pending')
+        INSERT INTO order_items (order_id, menu_item_id, station_id, quantity, unit_price_cents, print_status,deal_id)
+        VALUES (?, ?, ?, ?, ?, 'pending', ?)
     `);
 
     const transaction = db.transaction(() => {
         const orderResult = insertOrder.run(ticket_number, order_type ?? 'takeaway', total_amount_cents, created_by);
         const orderId = orderResult.lastInsertRowid;
         for (const item of items) {
-            insertItem.run(orderId, item.menu_item_id, item.station_id, item.quantity, item.unit_price_cents);
+            insertItem.run(orderId, item.menu_item_id, item.station_id, item.quantity, item.unit_price_cents,item.deal_id ?? null);
         }
         return orderId;
     });
