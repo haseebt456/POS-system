@@ -1,5 +1,7 @@
 const db = require('../db');
 const { adjustStockByDelta } = require('./ingredient');
+const { getDealWithItems } = require('./deal');
+
 
 function generateTicketNumber() {
     // Simple daily-reset-friendly ticket number: timestamp-based, human-readable enough for kitchen callouts
@@ -8,6 +10,19 @@ function generateTicketNumber() {
     const timePart = String(now.getHours()).padStart(2, '0') + String(now.getMinutes()).padStart(2, '0') + String(now.getSeconds()).padStart(2, '0');
     return `T${datePart}-${timePart}`;
 }
+function expandDealToOrderItems(deal_id, dealQuantity = 1) {
+    const deal = getDealWithItems(deal_id);
+    if (!deal) throw new Error(`Deal ${deal_id} not found`);
+
+    return deal.items.map((component, index) => ({
+        menu_item_id: component.menu_item_id,
+        station_id: component.station_id,
+        quantity: component.quantity * dealQuantity,
+        unit_price_cents: index === 0 ? deal.price_cents : 0,
+        deal_id: deal.id
+    }));
+}
+
 
 function createOrder({ order_type, items, created_by }) {
     // items: [{ menu_item_id, station_id, quantity, unit_price_cents }]
@@ -72,4 +87,4 @@ function completeOrder(orderId) {
     transaction();
 }
 
-module.exports = { createOrder, getOrderById, completeOrder, generateTicketNumber };
+module.exports = { expandDealToOrderItems, createOrder, getOrderById, completeOrder, generateTicketNumber };
