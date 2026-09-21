@@ -1,12 +1,30 @@
-const db  = require('./db');
+const express = require('express');
+const cors = require('cors');
 
-console.log("sqllite connscted. DB file at :", db.name);
+const ingredientsRouter = require('./routes/ingredients');
+// As you build these, add the same way:
+// const menuItemsRouter = require('./routes/menuItems');
+// const ordersRouter = require('./routes/orders');
+// const dealsRouter = require('./routes/deals');
 
-db.exec('CREATE TABLE IF NOT EXISTS test_table (id INTEGER PRIMARY KEY, note TEXT)');
-db.prepare('INSERT INTO test_table (note) VALUES (?)').run('Hello, world!');
+const app = express();
+const PORT = 3001;
 
-const row = db.prepare('SELECT * FROM test_table').all();
+app.use(cors()); // local-only app, but keeps fetch() calls from the renderer simple
+app.use(express.json());
 
-console.log("test read",row);
-db.exec('DROP TABLE test_table');
-console.log('Cleanup done. Step 1 confirmed working.');
+app.use('/api/ingredients', ingredientsRouter);
+// app.use('/api/menu-items', menuItemsRouter);
+// app.use('/api/orders', ordersRouter);
+// app.use('/api/deals', dealsRouter);
+
+function startServer() {
+    return new Promise((resolve) => {
+        const server = app.listen(PORT, 'localhost', () => {
+            console.log(`Backend API listening on http://localhost:${PORT}`);
+            resolve(server);
+        });
+    });
+}
+
+module.exports = { app, startServer };
