@@ -4,7 +4,7 @@ const cors = require('cors');
 const ingredientsRouter = require('./routes/ingredients');
 // As you build these, add the same way:
 // const menuItemsRouter = require('./routes/menuItems');
-// const ordersRouter = require('./routes/orders');
+const ordersRouter = require('./routes/orders');
 // const dealsRouter = require('./routes/deals');
 
 const app = express();
@@ -15,7 +15,7 @@ app.use(express.json());
 
 app.use('/api/ingredients', ingredientsRouter);
 // app.use('/api/menu-items', menuItemsRouter);
-// app.use('/api/orders', ordersRouter);
+app.use('/api/orders', ordersRouter);
 // app.use('/api/deals', dealsRouter);
 
 function startServer() {
