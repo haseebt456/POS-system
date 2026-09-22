@@ -5,7 +5,7 @@ const ingredientsRouter = require('./routes/ingredients');
 
 const menuItemsRouter = require('./routes/menuItems');
 const ordersRouter = require('./routes/orders');
-// const dealsRouter = require('./routes/deals');
+const dealsRouter = require('./routes/deals');
 
 const app = express();
 const PORT = 3001;
