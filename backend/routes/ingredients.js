@@ -4,7 +4,6 @@ const {
     createIngredient,
     getAllIngredients,
     getLowStock,
-    updateIngredientDetails,
     setStockAbsolute,
     deactivateIngredient,
 } = require('../models/ingredient');
@@ -37,15 +36,6 @@ router.post('/', (req, res) => {
     }
 });
 
-// PUT /api/ingredients/:id
-router.put('/:id', (req, res) => {
-    try {
-        updateIngredientDetails(req.params.id, req.body);
-        res.json({ ok: true });
-    } catch (err) {
-        res.status(400).json({ error: err.message });
-    }
-});
 
 // PUT /api/ingredients/:id/stock  (manual reconciliation — overwrite, not delta)
 router.put('/:id/stock', (req, res) => {
