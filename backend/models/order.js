@@ -87,4 +87,10 @@ function completeOrder(orderId) {
     transaction();
 }
 
-module.exports = { expandDealToOrderItems, createOrder, getOrderById, completeOrder, generateTicketNumber };
+function getPendingOrders() {
+    const orders = db.prepare(`SELECT * FROM orders WHERE status = 'pending' ORDER BY created_at ASC`).all();
+    const countStmt = db.prepare(`SELECT COUNT(*) AS count FROM order_items WHERE order_id = ?`);
+    return orders.map(order => ({ ...order, items: new Array(countStmt.get(order.id).count) }));
+}
+
+module.exports = { getPendingOrders, expandDealToOrderItems, createOrder, getOrderById, completeOrder, generateTicketNumber };

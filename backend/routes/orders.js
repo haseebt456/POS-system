@@ -7,6 +7,15 @@ const {
     expandDealToOrderItems,
 } = require('../models/order');
 
+// GET /api/orders/pending  — must come before /:id or Express will treat "pending" as an id
+router.get('/pending', (req, res) => {
+    try {
+        res.json(getPendingOrders());
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
 // GET /api/orders/:id
 router.get('/:id', (req, res) => {
     try {
