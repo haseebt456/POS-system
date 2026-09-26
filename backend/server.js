@@ -6,7 +6,7 @@ const ingredientsRouter = require('./routes/ingredients');
 const menuItemsRouter = require('./routes/menuItems');
 const ordersRouter = require('./routes/orders');
 const dealsRouter = require('./routes/deals');
-
+const stationsRouter = require('./routes/stations');
 const app = express();
 const PORT = 3001;
 
@@ -17,6 +17,7 @@ app.use('/api/ingredients', ingredientsRouter);
 app.use('/api/menu-items', menuItemsRouter);
 app.use('/api/orders', ordersRouter);
 app.use('/api/deals', dealsRouter);
+app.use('/api/stations', stationsRouter);
 
 function startServer() {
     return new Promise((resolve) => {
