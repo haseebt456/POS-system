@@ -12,7 +12,10 @@ async function request(method, path, body) {
   }
   return res.json();
 }
-
+export const stationsApi = {
+  getAll: () => request('GET', '/stations'),
+  create: (data) => request('POST', '/stations', data),
+};  
 export const ingredientsApi = {
   create: (data) => request('POST', '/ingredients', data),
   getAll: () => request('GET', '/ingredients'),
