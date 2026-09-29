@@ -2,6 +2,9 @@ import {useState, useEffect} from 'react'
 import {menuItemsApi, dealsApi, ingredientsApi, stationsApi} from '../../api/client'
 import MenuItemList from '../menu/MenuItemList'
 import MenuItemForm from '../menu/MenuItemForm'
+import DealForm from '../menu/DealForm'
+import DealList from '../menu/DealList'
+
 
 function MenuManagementScreen() {
     const [menuItems, setMenuItems] = useState([])
@@ -62,7 +65,8 @@ function MenuManagementScreen() {
       <MenuItemForm stations={stations} onCreate={handleCreateMenuItem} />
       <MenuItemList menuItems={menuItems} ingredients={ingredients} stations={stations} />
 
-      
+      <DealForm onCreate={handleCreateDeal} />
+      <DealList deals={deals} menuItems={menuItems} />
     </div>
   )
 }
