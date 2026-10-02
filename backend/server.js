@@ -7,6 +7,8 @@ const menuItemsRouter = require('./routes/menuItems');
 const ordersRouter = require('./routes/orders');
 const dealsRouter = require('./routes/deals');
 const stationsRouter = require('./routes/stations');
+const purchasesRouter = require('./routes/purchase');
+const supplierRouter = require('./routes/supplier');
 const app = express();
 const PORT = 3001;
 
@@ -18,6 +20,8 @@ app.use('/api/menu-items', menuItemsRouter);
 app.use('/api/orders', ordersRouter);
 app.use('/api/deals', dealsRouter);
 app.use('/api/stations', stationsRouter);
+app.use('/api/purchases', purchasesRouter);
+app.use('/api/suppliers', supplierRouter);
 
 function startServer() {
     return new Promise((resolve) => {
