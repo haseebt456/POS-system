@@ -3,11 +3,15 @@ import TabNav from './components/layout/TabNav'
 import InventoryScreen from './components/screens/InventoryScreen'
 import SalesScreen from './components/screens/SalesScreen'
 import MenuManagementScreen from './components/screens/MenuManagementScreen'
+import PurchaseScreen from './components/screens/PurchaseScreen'
+import StationsScreen from './components/screens/StationsScreen'
 
 const TABS = [
    { id: 'inventory', label: 'Inventory' },
    { id: 'sales', label: 'Sales' },
    { id:'menu', label:'Menu'},
+   { id:'purchases', label:'Purchases'},
+   { id:'stations', label:'Printers'},
 ]
 function App() {
   const [activeTab, setActiveTab] = useState('sales')
@@ -18,6 +22,8 @@ function App() {
       {activeTab === 'inventory' && <InventoryScreen />}
       {activeTab === 'sales' && <SalesScreen />}
       {activeTab === 'menu' && <MenuManagementScreen />}
+      {activeTab === 'purchases' && <PurchaseScreen />}
+      {activeTab === 'stations' && <StationsScreen />}
     </div>
   )
 }
