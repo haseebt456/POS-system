@@ -5,7 +5,10 @@ const {
     completeOrder,
     getOrderById,
     expandDealToOrderItems,
+    getPendingOrders,
 } = require('../models/order');
+const { getPrintStatusForOrder } = require('../models/print');
+const { printOrder, previewOrder } = require('../printing/printService');
 
 // GET /api/orders/pending  — must come before /:id or Express will treat "pending" as an id
 router.get('/pending', (req, res) => {
@@ -73,6 +76,39 @@ router.put('/:id/complete', (req, res) => {
     } catch (err) {
         // completeOrder throws on "not found" or "already completed" — both are
         // client errors (400), not server errors (500)
+        res.status(400).json({ error: err.message });
+    }
+});
+
+// GET /api/orders/:id/print-status — per-station and receipt print state
+router.get('/:id/print-status', (req, res) => {
+    try {
+        const status = getPrintStatusForOrder(req.params.id);
+        if (!status) return res.status(404).json({ error: 'Order not found' });
+        res.json(status);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// GET /api/orders/:id/preview — rendered ticket text, nothing is sent to a printer
+router.get('/:id/preview', (req, res) => {
+    try {
+        res.json(previewOrder(req.params.id));
+    } catch (err) {
+        res.status(404).json({ error: err.message });
+    }
+});
+
+// POST /api/orders/:id/print
+// body: { force?: boolean }
+// Idempotent by default — already-printed stations are skipped so a retry click
+// can't emit duplicate kitchen tickets. force=true reprints everything.
+router.post('/:id/print', async (req, res) => {
+    try {
+        const result = await printOrder(req.params.id, { force: req.body?.force === true });
+        res.json(result);
+    } catch (err) {
         res.status(400).json({ error: err.message });
     }
 });
