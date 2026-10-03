@@ -48,6 +48,21 @@ function deactivateIngredient(id) {
     db.prepare(`UPDATE ingredients SET is_active = 0 WHERE id = ?`).run(id);
 }
 
+// Applies a whole physical count at once. Wrapped in a transaction because a
+// half-applied stock count is worse than none — the operator would have no way to
+// tell which rows took and which didn't, and the numbers would be quietly wrong.
+// Reuses setStockAbsolute so there's exactly one place that overwrites stock.
+function reconcileStock(entries) {
+    const apply = db.transaction(() => {
+        for (const entry of entries) {
+            setStockAbsolute(entry.id, entry.actual_qty);
+        }
+        return entries.length;
+    });
+
+    return apply();
+}
+
 module.exports = {
     createIngredient,
     getAllIngredients,
@@ -55,5 +70,6 @@ module.exports = {
     adjustStockByDelta,
     setStockAbsolute,
     getLowStock,
-    deactivateIngredient
+    deactivateIngredient,
+    reconcileStock
 };
