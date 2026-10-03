@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { ingredientsApi } from '../../api/client';
 import IngredientForm from '../inventory/IngredientForm';
 import IngredientTable from '../inventory/IngredientTable';
+import StockCountPanel from '../inventory/StockCountPanel';
 
 const EMPTY_FORM = { name: '', unit: 'kg', stock_qty: '', low_stock_threshold: '', is_trackable: true };
 
@@ -25,6 +26,8 @@ function InventoryScreen() {
   const [form, setForm] = useState(EMPTY_FORM);
   const [fieldErrors, setFieldErrors] = useState({});
   const [editingId, setEditingId] = useState(null);
+  const [counting, setCounting] = useState(false);
+  const [countSubmitting, setCountSubmitting] = useState(false);
 
   async function loadIngredients() {
     setLoading(true);
@@ -104,11 +107,39 @@ function InventoryScreen() {
     }
   }
 
+  // Applies a whole physical count in one request. The backend wraps it in a
+  // transaction, so a failure part-way can't leave some rows updated and others not.
+  async function handleReconcile(entries) {
+    setCountSubmitting(true);
+    setError(null);
+    try {
+      await ingredientsApi.reconcile(entries);
+      setCounting(false);
+      await loadIngredients();
+    } catch (err) {
+      setError('Could not apply physical count. ' + err.message);
+    } finally {
+      setCountSubmitting(false);
+    }
+  }
+
+  const trackableCount = ingredients.filter((i) => i.is_trackable).length;
+
   return (
     <div style={{ padding: '24px 20px' }}>
       <header style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 20 }}>
         <h1 style={{ fontSize: 24, fontWeight: 700, margin: 0 }}>Inventory</h1>
-        <span style={{ fontSize: 14, color: '#6b7280' }}>{ingredients.length} ingredients</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+          <span style={{ fontSize: 14, color: '#6b7280' }}>{ingredients.length} ingredients</span>
+          {!counting && trackableCount > 0 && (
+            <button
+              style={{ padding: '9px 16px', fontSize: 14, fontWeight: 600, background: '#fff', color: '#2563eb', border: '1px solid #93b4f5', borderRadius: 8, cursor: 'pointer' }}
+              onClick={() => { setCounting(true); cancelEdit(); }}
+            >
+              Physical count
+            </button>
+          )}
+        </div>
       </header>
 
       {error && (
@@ -117,14 +148,25 @@ function InventoryScreen() {
         </div>
       )}
 
-      <IngredientForm
-        form={form}
-        setForm={setForm}
-        fieldErrors={fieldErrors}
-        editingId={editingId}
-        onSubmit={handleSubmit}
-        onCancel={cancelEdit}
-      />
+      {counting && (
+        <StockCountPanel
+          ingredients={ingredients}
+          submitting={countSubmitting}
+          onSubmit={handleReconcile}
+          onCancel={() => setCounting(false)}
+        />
+      )}
+
+      {!counting && (
+        <IngredientForm
+          form={form}
+          setForm={setForm}
+          fieldErrors={fieldErrors}
+          editingId={editingId}
+          onSubmit={handleSubmit}
+          onCancel={cancelEdit}
+        />
+      )}
 
       <IngredientTable
         ingredients={ingredients}
