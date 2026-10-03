@@ -87,10 +87,21 @@ function completeOrder(orderId) {
     transaction();
 }
 
+// Returns the REAL item rows. This used to be `new Array(count)` — empty slots padded
+// to the item count purely so `.length` worked in the UI. But JSON has no holes, so it
+// crossed the wire as [null, null, null], and the print badge reading `.print_status`
+// off each entry crashed the whole Sales screen on null.
 function getPendingOrders() {
     const orders = db.prepare(`SELECT * FROM orders WHERE status = 'pending' ORDER BY created_at ASC`).all();
-    const countStmt = db.prepare(`SELECT COUNT(*) AS count FROM order_items WHERE order_id = ?`);
-    return orders.map(order => ({ ...order, items: new Array(countStmt.get(order.id).count) }));
+    const itemsStmt = db.prepare(`
+        SELECT oi.id, oi.menu_item_id, oi.station_id, oi.quantity, oi.unit_price_cents,
+               oi.print_status, oi.print_error, mi.name AS menu_item_name
+        FROM order_items oi
+        JOIN menu_items mi ON mi.id = oi.menu_item_id
+        WHERE oi.order_id = ?
+        ORDER BY oi.id
+    `);
+    return orders.map((order) => ({ ...order, items: itemsStmt.all(order.id) }));
 }
 
 module.exports = { getPendingOrders, expandDealToOrderItems, createOrder, getOrderById, completeOrder, generateTicketNumber };
