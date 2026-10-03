@@ -63,6 +63,13 @@ function recordSupplierPayment({ supplier_id, purchase_id = null, amount_cents }
     transaction();
 }
 
+// The history list. purchase_date is CURRENT_TIMESTAMP — second resolution — so two
+// deliveries recorded in the same second would tie and the "newest first" order would
+// wobble between refreshes. id DESC breaks the tie in insertion order.
+function getAllPurchases() {
+    return db.prepare(`SELECT * FROM purchases ORDER BY purchase_date DESC, id DESC`).all();
+}
+
 function getPurchasesForSupplier(supplier_id) {
     return db.prepare(`SELECT * FROM purchases WHERE supplier_id = ? ORDER BY purchase_date DESC`).all(supplier_id);
 }
@@ -86,6 +93,7 @@ function getPurchaseWithItems(purchase_id) {
 module.exports = {
     createPurchase,
     recordSupplierPayment,
+    getAllPurchases,
     getPurchasesForSupplier,
     getPaymentsForSupplier,
     getPurchaseWithItems,
