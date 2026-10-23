@@ -2,15 +2,7 @@ import { useState, useEffect } from 'react'
 import { stationsApi } from '../../api/client'
 import StationForm from '../stations/StationForm'
 import StationList from '../stations/StationList'
-
-const styles = {
-  page: { padding: '24px 20px', maxWidth: 900 },
-  h1: { fontSize: 24, fontWeight: 700, margin: '0 0 16px' },
-  banner: { background: '#fdecea', color: '#a32b1f', padding: '12px 16px', borderRadius: 8, marginBottom: 16, fontSize: 14, border: '1px solid #f3c8c2' },
-  info: { background: '#eef4ff', color: '#1e40af', padding: '12px 16px', borderRadius: 8, marginBottom: 16, fontSize: 14, border: '1px solid #c7d9fb' },
-  panel: { background: '#fff', border: '1px solid #e5e7eb', borderRadius: 12, padding: '18px 20px', marginBottom: 20 },
-  h2: { fontSize: 16, fontWeight: 700, margin: '0 0 12px', color: '#22262b' },
-};
+import { Panel, PageHeader, Banner } from '../ui'
 
 function StationsScreen() {
   const [stations, setStations] = useState([])
@@ -74,21 +66,21 @@ function StationsScreen() {
     }
   }
 
-  if (loading) return <div style={styles.page}>Loading…</div>
+  if (loading) return <div className="page">Loading…</div>
 
-  const hasReceiptStation = stations.some((s) => s.printer_type === 'receipt');
+  const hasReceiptStation = stations.some((s) => s.printer_type === 'receipt')
 
   return (
-    <div style={styles.page}>
-      <h1 style={styles.h1}>Printer Stations</h1>
+    <div className="page stack">
+      <PageHeader title="Printer Stations" />
 
-      {error && <div style={styles.banner}>{error}</div>}
+      {error && <Banner tone="danger">{error}</Banner>}
 
       {!hasReceiptStation && (
-        <div style={styles.info}>
+        <Banner tone="info">
           No customer-receipt station yet. Orders will still print to kitchen stations — receipts are
           simply skipped until one is added.
-        </div>
+        </Banner>
       )}
 
       <StationForm
@@ -97,8 +89,7 @@ function StationsScreen() {
         onCancelEdit={() => setEditing(null)}
       />
 
-      <div style={styles.panel}>
-        <h2 style={styles.h2}>Configured stations</h2>
+      <Panel title="Configured stations">
         <StationList
           stations={stations}
           onEdit={setEditing}
@@ -107,7 +98,7 @@ function StationsScreen() {
           testingId={testingId}
           testResults={testResults}
         />
-      </div>
+      </Panel>
     </div>
   )
 }

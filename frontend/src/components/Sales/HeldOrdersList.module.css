@@ -1,0 +1,69 @@
+/* Held orders. Same rail shape as the pending list, and deliberately capped the way the cart is:
+   the pending list below keeps `flex: 1`, so parking one cart does not halve the room for the
+   orders that are actually waiting to be handed over. It grows to fit what is in it, up to a
+   ceiling, and scrolls inside that. */
+.panel {
+  display: flex;
+  flex-direction: column;
+  flex: 0 1 auto;
+  max-height: 40vh;
+  min-height: 0;
+}
+
+.list {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.empty {
+  padding: var(--space-2) var(--space-5) var(--space-5);
+  font-size: var(--text-md);
+  color: var(--text-subtle);
+}
+
+.order {
+  padding: var(--space-3) var(--space-5);
+  border-top: 1px solid var(--border-subtle);
+}
+
+.orderTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.ticket {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-md);
+  font-weight: var(--weight-bold);
+  color: var(--text);
+}
+
+/* One line, ellipsised. The summary exists to recognise the order by, not to be read in full —
+   the cart itself is one click away, and wrapping to three lines here would bury the buttons. */
+.meta {
+  margin-top: 2px;
+  overflow: hidden;
+  font-size: var(--text-sm);
+  color: var(--text-subtle);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.total {
+  font-size: var(--text-md);
+  font-weight: var(--weight-semibold);
+  font-variant-numeric: tabular-nums;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  margin-top: var(--space-2);
+  flex-wrap: wrap;
+}

@@ -1,62 +1,101 @@
 import { useState, useEffect } from 'react';
 import { dealsApi } from '../../api/client';
-
-const styles = {
-  wrap: { background: '#fafbfc', borderTop: '1px solid #f0f1f3', padding: '12px 16px' },
-  row: { fontSize: 13, padding: '6px 0' },
-  addRow: { display: 'flex', gap: 8, marginTop: 8, alignItems: 'center' },
-  select: { flex: '1 1 160px', padding: '7px 10px', fontSize: 13, border: '1px solid #d1d5db', borderRadius: 6, color: '#22262b' },
-  input: { flex: '0 1 90px', padding: '7px 10px', fontSize: 13, border: '1px solid #d1d5db', borderRadius: 6, color: '#22262b' },
-  button: { padding: '7px 14px', fontSize: 13, fontWeight: 600, background: '#2563eb', color: '#fff', border: 'none', borderRadius: 6, cursor: 'pointer' },
-  empty: { fontSize: 13, color: '#9ca3af' },
-  note: { fontSize: 12, color: '#9a6b00', marginTop: 8 },
-};
+import { Button, Input, Select } from '../ui';
+import { formatMoney } from '../../lib/money';
+import styles from './DealItemsManager.module.css';
 
 function DealItemsManager({ dealId, menuItems }) {
   const [items, setItems] = useState([]);
   const [menuItemId, setMenuItemId] = useState(menuItems[0]?.id ?? '');
   const [qty, setQty] = useState('1');
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   async function load() {
     setLoading(true);
-    const deal = await dealsApi.getById(dealId);
-    setItems(deal.items);
-    setLoading(false);
+    try {
+      const deal = await dealsApi.getById(dealId);
+      setItems(deal.items);
+      setError(null);
+    } catch (err) {
+      // Same trap as RecipeManager: a rejected fetch used to leave this stuck on
+      // "Loading…" forever because setLoading(false) was never reached.
+      setError('Could not load deal items. ' + err.message);
+    } finally {
+      setLoading(false);
+    }
   }
 
   useEffect(() => { load(); }, [dealId]);
 
-  async function handleAdd() {
+  async function handleAdd(e) {
+    e.preventDefault();
     if (!menuItemId || !qty) return;
-    await dealsApi.addItem(dealId, Number(menuItemId), Number(qty));
-    setQty('1');
-    await load();
+    try {
+      await dealsApi.addItem(dealId, Number(menuItemId), Number(qty));
+      setQty('1');
+      await load();
+    } catch (err) {
+      setError('Could not add item to deal. ' + err.message);
+    }
   }
 
+  // What the components would cost if bought separately. Shown so whoever builds the
+  // deal can see the discount they're actually giving away.
   const normalTotal = items.reduce((sum, i) => sum + i.normal_price_cents * i.quantity, 0);
 
-  if (loading) return <div style={styles.wrap}><span style={styles.empty}>Loading…</span></div>;
+  if (loading) {
+    return (
+      <div className={styles.wrap}>
+        <p className={styles.empty}>Loading…</p>
+      </div>
+    );
+  }
 
   return (
-    <div style={styles.wrap}>
-      {items.length === 0 ? (
-        <div style={styles.empty}>No items in this deal yet — add the components below.</div>
-      ) : (
-        <>
-          {items.map((i) => (
-            <div key={i.menu_item_id} style={styles.row}>{i.quantity}× {i.menu_item_name}</div>
-          ))}
-          <div style={styles.note}>Normal price for these items: Rs. {(normalTotal / 100).toFixed(0)}</div>
-        </>
+    <div className={styles.wrap}>
+      {error && <p className={styles.error}>{error}</p>}
+
+      {items.length === 0 && !error && (
+        <p className={styles.empty}>No items in this deal yet — add the components below.</p>
       )}
-      <div style={styles.addRow}>
-        <select style={styles.select} value={menuItemId} onChange={(e) => setMenuItemId(e.target.value)}>
+
+      {items.length > 0 && (
+        <div className={styles.list}>
+          {items.map((i) => (
+            <div key={i.menu_item_id} className={styles.row}>
+              <span className={styles.qty}>{i.quantity}×</span>
+              <span>{i.menu_item_name}</span>
+            </div>
+          ))}
+          <p className={styles.note}>Bought separately: {formatMoney(normalTotal)}</p>
+        </div>
+      )}
+
+      <form className={styles.addRow} onSubmit={handleAdd}>
+        <Select
+          aria-label="Menu item"
+          className={styles.select}
+          value={menuItemId}
+          onChange={(e) => setMenuItemId(e.target.value)}
+          disabled={menuItems.length === 0}
+        >
+          {menuItems.length === 0 && <option value="">No menu items yet</option>}
           {menuItems.map((m) => <option key={m.id} value={m.id}>{m.name}</option>)}
-        </select>
-        <input style={styles.input} type="number" min="1" value={qty} onChange={(e) => setQty(e.target.value)} />
-        <button style={styles.button} onClick={handleAdd}>Add to deal</button>
-      </div>
+        </Select>
+
+        <Input
+          aria-label="Quantity in this deal"
+          className={styles.count}
+          type="number" min="1" step="1"
+          value={qty}
+          onChange={(e) => setQty(e.target.value)}
+        />
+
+        <Button type="submit" variant="secondary" size="sm" disabled={menuItems.length === 0}>
+          Add to deal
+        </Button>
+      </form>
     </div>
   );
 }

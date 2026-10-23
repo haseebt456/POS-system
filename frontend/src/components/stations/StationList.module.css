@@ -1,0 +1,28 @@
+.actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-1);
+}
+
+.notConfigured {
+  font-size: var(--text-sm);
+  color: var(--warn-text);
+}
+
+.okLine {
+  margin-top: var(--space-1);
+  font-size: var(--text-sm);
+  color: var(--ok-text);
+}
+
+.failLine {
+  margin-top: var(--space-1);
+  font-size: var(--text-sm);
+  color: var(--danger-text);
+  word-break: break-word;
+}
+
+.address {
+  font-variant-numeric: tabular-nums;
+}

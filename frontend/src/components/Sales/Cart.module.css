@@ -1,0 +1,127 @@
+/* Flush panel: the line list scrolls edge to edge and the footer supplies its own
+   padding, so nothing double-pads. */
+.panel {
+  display: flex;
+  flex-direction: column;
+  /* Shrinks before the pending-orders panel does when the rail runs short, and caps
+     itself so twenty lines can't push Submit Order off the bottom of the till. The
+     number is a judgement call — roughly five or six lines on a 600px-high window. */
+  flex: 0 1 auto;
+  max-height: 55vh;
+  min-height: 0;
+}
+
+.empty {
+  padding: var(--space-2) var(--space-5) var(--space-5);
+  font-size: var(--text-md);
+  color: var(--text-subtle);
+}
+
+.lines {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.line {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-5);
+  border-top: 1px solid var(--border-subtle);
+}
+
+.lineMain {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+/* Ellipsis rather than wrap: a cart line is one line tall so a long product name can't
+   push the steppers or the price out of the rail. */
+.lineName {
+  overflow: hidden;
+  font-size: var(--text-md);
+  font-weight: var(--weight-semibold);
+  color: var(--text);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.controls {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.qtyValue {
+  min-width: 20px;
+  font-size: var(--text-md);
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+
+.lineTotal {
+  min-width: 72px;
+  font-size: var(--text-base);
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+/* The two things that must never scroll away: what the customer owes, and the button
+   that takes the money. */
+.footer {
+  flex: none;
+  padding: var(--space-3) var(--space-5) var(--space-4);
+  border-top: 2px solid var(--border);
+}
+
+.totalRow {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: var(--space-3);
+}
+
+.totalLabel {
+  font-size: var(--text-md);
+  color: var(--text-muted);
+}
+
+.totalValue {
+  font-size: var(--text-2xl);
+  font-weight: var(--weight-bold);
+  font-variant-numeric: tabular-nums;
+}
+
+.submit {
+  width: 100%;
+}
+
+/* Second weight, same width: holding is a real way out of a full cart, but it is not what the
+   operator is usually doing, so it must not read as a second primary action. */
+.hold {
+  width: 100%;
+  margin-top: var(--space-2);
+}
+
+/* Recalling a held order is a mode, not a message — the till is now editing an existing order
+   rather than starting one — so it is a tinted strip pinned above the lines rather than a
+   banner that could be mistaken for a notification. */
+.recall {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  background: var(--warn-bg-subtle);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.recallText {
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+}

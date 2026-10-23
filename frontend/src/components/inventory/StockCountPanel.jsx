@@ -1,25 +1,6 @@
 import { useState } from 'react';
-
-const styles = {
-  panel: { background: '#fff', border: '1px solid #2563eb', borderRadius: 12, padding: '18px 20px', marginBottom: 20 },
-  heading: { fontSize: 15, fontWeight: 700, margin: '0 0 6px', color: '#22262b' },
-  sub: { fontSize: 13, color: '#6b7280', margin: '0 0 16px' },
-  table: { width: '100%', borderCollapse: 'separate', borderSpacing: 0, fontSize: 14 },
-  th: {
-    textAlign: 'left', padding: '8px 12px', borderBottom: '1px solid #e5e7eb',
-    color: '#6b7280', fontWeight: 600, fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.04em',
-  },
-  td: { padding: '9px 12px', borderBottom: '1px solid #f0f1f3' },
-  input: { width: 110, padding: '7px 10px', fontSize: 14, border: '1px solid #d1d5db', borderRadius: 6, color: '#22262b', background: '#fff' },
-  varianceUp: { color: '#15803d', fontWeight: 600 },
-  varianceDown: { color: '#a32b1f', fontWeight: 600 },
-  varianceSame: { color: '#9ca3af' },
-  actions: { display: 'flex', gap: 10, alignItems: 'center', marginTop: 16 },
-  button: { padding: '11px 20px', fontSize: 15, fontWeight: 700, background: '#2563eb', color: '#fff', border: 'none', borderRadius: 8, cursor: 'pointer' },
-  buttonDisabled: { background: '#a8c5f5', cursor: 'not-allowed' },
-  cancel: { padding: '11px 16px', fontSize: 14, fontWeight: 600, background: 'none', color: '#6b7280', border: 'none', cursor: 'pointer' },
-  summary: { fontSize: 13, color: '#6b7280', marginLeft: 'auto' },
-};
+import { Panel, Table, Th, Td, Button, Input } from '../ui';
+import styles from './StockCountPanel.module.css';
 
 function StockCountPanel({ ingredients, onSubmit, onCancel, submitting }) {
   const [counts, setCounts] = useState({});
@@ -51,21 +32,20 @@ function StockCountPanel({ ingredients, onSubmit, onCancel, submitting }) {
   }
 
   return (
-    <div style={styles.panel}>
-      <div style={styles.heading}>Physical count</div>
-      <div style={styles.sub}>
+    <Panel className={styles.counting} title="Physical count">
+      <p className={styles.sub}>
         Enter what you actually counted on the shelf. Only the rows you fill in are changed —
         leave a box blank to skip that item. This <strong>overwrites</strong> the system figure,
         so it is for counting, not for adding or removing stock.
-      </div>
+      </p>
 
-      <table style={styles.table}>
+      <Table>
         <thead>
           <tr>
-            <th style={styles.th}>Ingredient</th>
-            <th style={styles.th}>System says</th>
-            <th style={styles.th}>Actual count</th>
-            <th style={styles.th}>Difference</th>
+            <Th>Ingredient</Th>
+            <Th align="right">System says</Th>
+            <Th align="right">Actual count</Th>
+            <Th>Difference</Th>
           </tr>
         </thead>
         <tbody>
@@ -76,44 +56,51 @@ function StockCountPanel({ ingredients, onSubmit, onCancel, submitting }) {
 
             return (
               <tr key={ing.id}>
-                <td style={styles.td}>{ing.name}</td>
-                <td style={styles.td}>{ing.stock_qty} {ing.unit}</td>
-                <td style={styles.td}>
-                  <input
-                    style={styles.input} type="number" min="0" step="0.01" placeholder="—"
-                    value={raw ?? ''}
-                    onChange={(e) => setCount(ing.id, e.target.value)}
-                  />
-                </td>
-                <td style={styles.td}>
-                  {variance === null || Number.isNaN(variance)
-                    ? <span style={styles.varianceSame}>—</span>
-                    : variance === 0
-                      ? <span style={styles.varianceSame}>no change</span>
-                      : variance > 0
-                        ? <span style={styles.varianceUp}>+{variance} {ing.unit}</span>
-                        : <span style={styles.varianceDown}>{variance} {ing.unit}</span>}
-                </td>
+                <Td>{ing.name}</Td>
+                <Td align="right">
+                  {ing.stock_qty} {ing.unit}
+                </Td>
+                <Td align="right">
+                  {/* The column heading is the visible label; this names the control for
+                      anyone not reading the table by sight. */}
+                  <span className={styles.countWrap}>
+                    <Input
+                      aria-label={`Actual count for ${ing.name}`}
+                      type="number" min="0" step="0.01" placeholder="—"
+                      value={raw ?? ''}
+                      onChange={(e) => setCount(ing.id, e.target.value)}
+                    />
+                  </span>
+                </Td>
+                <Td>
+                  {variance === null || Number.isNaN(variance) ? (
+                    <span className={styles.varianceSame}>—</span>
+                  ) : variance === 0 ? (
+                    <span className={styles.varianceSame}>no change</span>
+                  ) : variance > 0 ? (
+                    <span className={styles.varianceUp}>+{variance} {ing.unit}</span>
+                  ) : (
+                    <span className={styles.varianceDown}>{variance} {ing.unit}</span>
+                  )}
+                </Td>
               </tr>
             );
           })}
         </tbody>
-      </table>
+      </Table>
 
-      <div style={styles.actions}>
-        <button
-          style={{ ...styles.button, ...(entries.length === 0 || submitting ? styles.buttonDisabled : {}) }}
-          disabled={entries.length === 0 || submitting}
-          onClick={handleSubmit}
-        >
+      <div className={styles.actions}>
+        <Button variant="primary" disabled={entries.length === 0 || submitting} onClick={handleSubmit}>
           {submitting ? 'Saving…' : `Apply count (${entries.length})`}
-        </button>
-        <button style={styles.cancel} onClick={onCancel}>Cancel</button>
+        </Button>
+        <Button variant="ghost" onClick={onCancel}>Cancel</Button>
         {changedCount > 0 && (
-          <span style={styles.summary}>{changedCount} of {entries.length} counted items will change</span>
+          <span className={styles.summary}>
+            {changedCount} of {entries.length} counted items will change
+          </span>
         )}
       </div>
-    </div>
+    </Panel>
   );
 }
 

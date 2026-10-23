@@ -1,0 +1,42 @@
+/* A 12-column grid so the fields land in predictable places. The previous flex-wrap row
+   packed controls at their natural widths, which meant where they wrapped changed with
+   the length of the content — and at 900px they wrapped differently than at 1400px. */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: var(--space-3);
+  align-items: end;
+}
+
+.span5 { grid-column: span 5; }
+.span4 { grid-column: span 4; }
+.span3 { grid-column: span 3; }
+.span2 { grid-column: span 2; }
+
+.actions {
+  grid-column: span 3;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.hint {
+  margin-top: var(--space-4);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--border-subtle);
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+  line-height: var(--leading-normal);
+}
+
+/* Below roughly a tablet's width the 12-column split squeezes controls past usability,
+   so the fields go full width and stack. Inline styles could not express this at all. */
+@media (max-width: 760px) {
+  .span5,
+  .span4,
+  .span3,
+  .span2,
+  .actions {
+    grid-column: 1 / -1;
+  }
+}

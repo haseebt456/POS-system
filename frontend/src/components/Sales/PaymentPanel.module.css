@@ -1,0 +1,191 @@
+/* The payment slide-over. Everything here is inside the panel SlideOver renders; the panel's
+   own chrome (header, scrim, footer) is in ui/SlideOver.module.css. */
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.sectionTitle {
+  margin: 0;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-subtle);
+}
+
+/* --- Segmented control ----------------------------------------------------- */
+
+.segmented {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-2);
+}
+
+.segment {
+  padding: var(--space-3) var(--space-2);
+  font: inherit;
+  font-size: var(--text-md);
+  color: var(--text-muted);
+  background: var(--surface-sunken);
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+.segment:hover {
+  color: var(--text);
+  border-color: var(--border-strong);
+}
+
+.segmentActive {
+  color: var(--on-brand);
+  background: var(--brand);
+  border-color: var(--brand);
+  font-weight: var(--weight-medium);
+}
+
+/* --- Payment methods ------------------------------------------------------- */
+
+/* Wrapping rather than a fixed column count: the shop decides how many methods exist, and a
+   grid sized for four would leave a fifth stranded off the edge. */
+.methods {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.method {
+  flex: 1 1 auto;
+  min-width: 96px;
+  padding: var(--space-3) var(--space-3);
+  font: inherit;
+  font-size: var(--text-md);
+  color: var(--text);
+  background: var(--surface-sunken);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+.method:hover {
+  background: var(--surface-hover);
+}
+
+/* Same filled-pink treatment as the segmented control and the active nav pill — one visual
+   language for "this is the chosen one" everywhere in the app. */
+.methodActive {
+  color: var(--on-brand);
+  background: var(--brand);
+  border-color: var(--brand);
+  font-weight: var(--weight-medium);
+}
+
+.quickRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.change {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  background: var(--ok-bg);
+  border: 1px solid var(--ok-border);
+  border-radius: var(--radius-md);
+  color: var(--ok-text);
+}
+
+.change strong {
+  font-size: var(--text-xl);
+  font-variant-numeric: tabular-nums;
+}
+
+/* --- Summary --------------------------------------------------------------- */
+
+.summary {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  margin: 0;
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--border-subtle);
+}
+
+.summary div {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.summary dt {
+  font-size: var(--text-md);
+  color: var(--text-muted);
+}
+
+.summary dd {
+  margin: 0;
+  font-size: var(--text-md);
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+
+.discountRow dd {
+  color: var(--ok-text);
+}
+
+/* The number the whole panel exists to arrive at. */
+.totalRow {
+  margin-top: var(--space-2);
+  padding-top: var(--space-2);
+  border-top: 1px solid var(--border);
+}
+
+.totalRow dt,
+.totalRow dd {
+  font-size: var(--text-xl);
+  font-weight: var(--weight-semibold);
+  color: var(--text);
+}
+
+/* --- Messages -------------------------------------------------------------- */
+
+.note {
+  margin: 0;
+  font-size: var(--text-sm);
+  color: var(--text-subtle);
+  line-height: var(--leading-normal);
+}
+
+/* The live reason the Confirm button is disabled, said once, next to the button rather than
+   only at the field that caused it — on a long panel the offending field can be scrolled out
+   of sight while the button stays put. */
+.problem {
+  margin: 0;
+  font-size: var(--text-sm);
+  color: var(--danger-text);
+}
+
+.serverError {
+  margin: 0;
+  padding: var(--space-3);
+  font-size: var(--text-sm);
+  color: var(--danger-text);
+  background: var(--danger-bg);
+  border: 1px solid var(--danger-border);
+  border-radius: var(--radius-md);
+}

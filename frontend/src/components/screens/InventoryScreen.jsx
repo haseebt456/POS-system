@@ -1,8 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { ingredientsApi } from '../../api/client';
 import IngredientForm from '../inventory/IngredientForm';
 import IngredientTable from '../inventory/IngredientTable';
 import StockCountPanel from '../inventory/StockCountPanel';
+import { PageHeader, Banner, Button, Field, Input, Panel, Select } from '../ui';
+import styles from './InventoryScreen.module.css';
 
 const EMPTY_FORM = { name: '', unit: 'kg', stock_qty: '', low_stock_threshold: '', is_trackable: true };
 
@@ -18,6 +20,16 @@ function validateForm(form) {
   return errors;
 }
 
+// Deliberately no "sort by quantity". These ingredients are measured in different units, so 3kg
+// and 3pcs are not comparable and any ordering by that column would be an arbitrary one wearing
+// the clothes of a ranking. What a shop actually asks is "what needs attention", and the
+// low-stock flag — which is threshold-aware and per-unit — is the honest answer to that.
+const DEFAULT_SORT = 'name';
+const SORTS = [
+  { id: 'name', label: 'Name (A–Z)' },
+  { id: 'low', label: 'Low stock first' },
+];
+
 function InventoryScreen() {
   const [ingredients, setIngredients] = useState([]);
   const [lowStockIds, setLowStockIds] = useState(new Set());
@@ -28,6 +40,10 @@ function InventoryScreen() {
   const [editingId, setEditingId] = useState(null);
   const [counting, setCounting] = useState(false);
   const [countSubmitting, setCountSubmitting] = useState(false);
+
+  // Filters. Kept in one object for the reason given in StockMovementsScreen: several useState
+  // calls means several renders, and the table is derived from all of them at once.
+  const [filters, setFilters] = useState({ search: '', lowOnly: false, sort: DEFAULT_SORT });
 
   async function loadIngredients() {
     setLoading(true);
@@ -44,6 +60,45 @@ function InventoryScreen() {
   }
 
   useEffect(() => { loadIngredients(); }, []);
+
+  const { search, lowOnly, sort } = filters;
+
+  function patch(changes) {
+    setFilters((prev) => ({ ...prev, ...changes }));
+  }
+
+  // Filtering and sorting happen here rather than in a request: the whole ingredient list is a
+  // few dozen rows loaded in one go, and a round trip per keystroke would make the search feel
+  // worse than the list it is searching.
+  const visible = useMemo(() => {
+    const needle = search.trim().toLowerCase();
+
+    const matched = ingredients.filter((ing) => {
+      if (needle && !ing.name.toLowerCase().includes(needle)) return false;
+      if (lowOnly && !lowStockIds.has(ing.id)) return false;
+      return true;
+    });
+
+    // Ties break on name, so the order is stable between renders and two ingredients that are
+    // both low don't swap places every time the list reloads.
+    return matched.sort((a, b) => {
+      if (sort === 'low') {
+        const rank = (ing) => (lowStockIds.has(ing.id) ? 0 : 1);
+        const byRank = rank(a) - rank(b);
+        if (byRank !== 0) return byRank;
+      }
+      return a.name.localeCompare(b.name);
+    });
+  }, [ingredients, lowStockIds, search, lowOnly, sort]);
+
+  const lowCount = visible.filter((ing) => lowStockIds.has(ing.id)).length;
+  const untrackedCount = visible.filter((ing) => !ing.is_trackable).length;
+  // Two different questions, so two different flags. `filtered` says "these controls differ from
+  // their defaults" and drives the Reset button; `narrowed` says "something is being hidden" and
+  // drives the empty state. Sorting changes no result count, so on an empty catalogue it must not
+  // be able to claim that a filter excluded everything.
+  const narrowed = search.trim() !== '' || lowOnly;
+  const filtered = narrowed || sort !== DEFAULT_SORT;
 
   function startEdit(ing) {
     setEditingId(ing.id);
@@ -125,56 +180,134 @@ function InventoryScreen() {
 
   const trackableCount = ingredients.filter((i) => i.is_trackable).length;
 
+  if (loading) return <div className="page">Loading…</div>;
+
   return (
-    <div style={{ padding: '24px 20px' }}>
-      <header style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 20 }}>
-        <h1 style={{ fontSize: 24, fontWeight: 700, margin: 0 }}>Inventory</h1>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-          <span style={{ fontSize: 14, color: '#6b7280' }}>{ingredients.length} ingredients</span>
-          {!counting && trackableCount > 0 && (
-            <button
-              style={{ padding: '9px 16px', fontSize: 14, fontWeight: 600, background: '#fff', color: '#2563eb', border: '1px solid #93b4f5', borderRadius: 8, cursor: 'pointer' }}
-              onClick={() => { setCounting(true); cancelEdit(); }}
-            >
+    <div className={`page stack ${styles.page}`}>
+      <PageHeader
+        title="Stock"
+        meta={`${ingredients.length} ingredient${ingredients.length === 1 ? '' : 's'} · ${lowStockIds.size} low`}
+        actions={
+          !counting && trackableCount > 0 ? (
+            <Button variant="secondary" onClick={() => { setCounting(true); cancelEdit(); }}>
               Physical count
-            </button>
+            </Button>
+          ) : null
+        }
+      />
+
+      {error && <Banner tone="danger">{error}</Banner>}
+
+      <div className={styles.split}>
+        <aside className={styles.rail}>
+          <Panel title="Filters" className={styles.railPanel}>
+            <div className={styles.railBody}>
+              <Field label="Search">
+                <Input
+                  type="search"
+                  placeholder="Ingredient name…"
+                  value={search}
+                  onChange={(e) => patch({ search: e.target.value })}
+                />
+              </Field>
+
+              <label className={styles.check}>
+                <input
+                  type="checkbox"
+                  checked={lowOnly}
+                  onChange={(e) => patch({ lowOnly: e.target.checked })}
+                />
+                Low stock only
+              </label>
+
+              <Field label="Order">
+                <Select value={sort} onChange={(e) => patch({ sort: e.target.value })}>
+                  {SORTS.map((entry) => (
+                    <option key={entry.id} value={entry.id}>
+                      {entry.label}
+                    </option>
+                  ))}
+                </Select>
+              </Field>
+            </div>
+
+            <div className={styles.railFooter}>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setFilters({ search: '', lowOnly: false, sort: DEFAULT_SORT })}
+                disabled={!filtered}
+              >
+                Reset filters
+              </Button>
+            </div>
+          </Panel>
+        </aside>
+
+        <div className={styles.main}>
+          {/* Counting and editing are the two things this screen is for, and they are mutually
+              exclusive — you cannot correct the shelf while typing a new ingredient. */}
+          {counting ? (
+            <StockCountPanel
+              ingredients={ingredients}
+              submitting={countSubmitting}
+              onSubmit={handleReconcile}
+              onCancel={() => setCounting(false)}
+            />
+          ) : (
+            <IngredientForm
+              form={form}
+              setForm={setForm}
+              fieldErrors={fieldErrors}
+              editingId={editingId}
+              onSubmit={handleSubmit}
+              onCancel={cancelEdit}
+            />
+          )}
+
+          {/* Counts describe what is on screen, not the whole catalogue — the header above
+              already carries the catalogue total, and two different totals on one page without
+              labels saying which is which is how people stop trusting both. */}
+          <div className={styles.summary}>
+            <div className={styles.summaryItem}>
+              <span className={styles.summaryLabel}>Ingredients</span>
+              <span className={styles.summaryValue}>{visible.length}</span>
+            </div>
+            <div className={styles.summaryItem}>
+              <span className={styles.summaryLabel}>Low stock</span>
+              <span className={lowCount > 0 ? styles.summaryValueWarn : styles.summaryValue}>
+                {lowCount}
+              </span>
+            </div>
+            <div className={styles.summaryItem}>
+              <span className={styles.summaryLabel}>Not tracked</span>
+              <span className={untrackedCount > 0 ? styles.summaryValue : styles.summaryValueMuted}>
+                {untrackedCount}
+              </span>
+            </div>
+          </div>
+
+          {/* The table's own empty state says "Add your first one above", which is wrong when the
+              list is empty because a filter hid everything — so a filtered miss is answered here
+              instead, and the table only ever renders a genuinely empty catalogue. */}
+          {narrowed && visible.length === 0 ? (
+            <Panel flush>
+              <div className={styles.state}>
+                <p className={styles.stateTitle}>No ingredients match these filters</p>
+                <p className={styles.stateBody}>Try a shorter search, or turn off "low stock only".</p>
+              </div>
+            </Panel>
+          ) : (
+            <IngredientTable
+              ingredients={visible}
+              lowStockIds={lowStockIds}
+              loading={false}
+              onEdit={startEdit}
+              onDeactivate={handleDeactivate}
+            />
           )}
         </div>
-      </header>
-
-      {error && (
-        <div style={{ background: '#fdecea', color: '#a32b1f', padding: '12px 16px', borderRadius: 8, marginBottom: 18, fontSize: 14, border: '1px solid #f3c8c2' }}>
-          {error}
-        </div>
-      )}
-
-      {counting && (
-        <StockCountPanel
-          ingredients={ingredients}
-          submitting={countSubmitting}
-          onSubmit={handleReconcile}
-          onCancel={() => setCounting(false)}
-        />
-      )}
-
-      {!counting && (
-        <IngredientForm
-          form={form}
-          setForm={setForm}
-          fieldErrors={fieldErrors}
-          editingId={editingId}
-          onSubmit={handleSubmit}
-          onCancel={cancelEdit}
-        />
-      )}
-
-      <IngredientTable
-        ingredients={ingredients}
-        lowStockIds={lowStockIds}
-        loading={loading}
-        onEdit={startEdit}
-        onDeactivate={handleDeactivate}
-      />
+      </div>
     </div>
   );
 }

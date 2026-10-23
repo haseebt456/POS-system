@@ -1,0 +1,100 @@
+/* flex: 1 + min-height: 0 makes this the region that absorbs whatever height the rail
+   has left after the cart and any warning. Its own list scrolls, so a backlog of orders
+   never lengthens the page — it just scrolls inside this panel. */
+.panel {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+.list {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.error {
+  padding: 0 var(--space-5) var(--space-2);
+  font-size: var(--text-base);
+  color: var(--danger-text);
+}
+
+.empty {
+  padding: var(--space-2) var(--space-5) var(--space-5);
+  font-size: var(--text-md);
+  color: var(--text-subtle);
+}
+
+.order {
+  padding: var(--space-3) var(--space-5);
+  border-top: 1px solid var(--border-subtle);
+}
+
+.orderTop {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.ticket {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-md);
+  font-weight: var(--weight-bold);
+  color: var(--text);
+}
+
+.meta {
+  margin-top: 2px;
+  font-size: var(--text-sm);
+  color: var(--text-subtle);
+}
+
+.total {
+  font-size: var(--text-md);
+  font-weight: var(--weight-semibold);
+  font-variant-numeric: tabular-nums;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  margin-top: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.previewLabel {
+  margin: var(--space-3) 0 var(--space-1);
+  font-size: var(--text-xs);
+  color: var(--text-subtle);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+/* Printer output, not UI: monospace on a dark ground reads as "this is what the paper
+   will say" and keeps the operator from mistaking it for something they can click.
+   White-space is preserved so the 32/48-column alignment survives, which means it
+   scrolls sideways on a narrow rail rather than wrapping and destroying the layout. */
+.preview {
+  max-height: 260px;
+  margin: 0;
+  padding: var(--space-3) var(--space-4);
+  overflow: auto;
+  /* Deliberately NOT a theme surface. This previews thermal paper, so it stays light
+     in a dark UI the way a document preview stays white in a dark editor — the point is
+     to show what comes out of the printer.
+     It used to be `background: var(--text)`, which was a way to get near-black on the
+     light theme. --text is near-white now, so that trick rendered light grey on
+     near-white and the receipt disappeared. */
+  background: #f7f7f5;
+  color: #1a1a1a;
+  border-radius: var(--radius-md);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  line-height: 1.35;
+  white-space: pre;
+}

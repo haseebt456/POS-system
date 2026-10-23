@@ -1,74 +1,99 @@
-import {useState, useEffect} from 'react'
-import {menuItemsApi, dealsApi, ingredientsApi, stationsApi} from '../../api/client'
-import MenuItemList from '../menu/MenuItemList'
-import MenuItemForm from '../menu/MenuItemForm'
-import DealForm from '../menu/DealForm'
-import DealList from '../menu/DealList'
-
+import { useState, useEffect } from 'react';
+import { menuItemsApi, dealsApi, ingredientsApi, stationsApi, categoriesApi } from '../../api/client';
+import MenuItemList from '../menu/MenuItemList';
+import MenuItemForm from '../menu/MenuItemForm';
+import DealForm from '../menu/DealForm';
+import DealList from '../menu/DealList';
+import { Banner, PageHeader } from '../ui';
 
 function MenuManagementScreen() {
-    const [menuItems, setMenuItems] = useState([])
-    const [deals, setDeals] = useState([])
-    const [ingredients, setIngredients] = useState([])
-    const [stations, setStations] = useState([])
-    const [loading, setLoading] = useState(true)
-    const [error, setError] = useState(null)
-    async function loadAll() {
-        setLoading(true)
-        setError(null)
-        try {
-            const [menuItems, deals, ingredients, stations] = await Promise.all([
-                menuItemsApi.getAll(),
-                dealsApi.getAll(),
-                ingredientsApi.getAll(),
-                stationsApi.getAll()
-            ])
-            setMenuItems(menuItems)
-            setDeals(deals)
-            setIngredients(ingredients)
-            setStations(stations)
-        } catch (err) {
-            setError("Could not load menu data: " + err.message)
-        } finally {
-            setLoading(false)
-        }
+  const [menuItems, setMenuItems] = useState([]);
+  const [deals, setDeals] = useState([]);
+  const [ingredients, setIngredients] = useState([]);
+  const [stations, setStations] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // `initial` distinguishes the first load from a refresh after a write. Without it every
+  // add blanked the whole screen to "Loading…" and remounted the form — on a screen whose
+  // entire job is keying in a list of menu items, that flash lands on every single row.
+  async function loadAll({ initial = false } = {}) {
+    if (initial) setLoading(true);
+    setError(null);
+    try {
+      const [items, dealRows, ingredientRows, stationRows, categoryRows] = await Promise.all([
+        menuItemsApi.getAll(),
+        dealsApi.getAll(),
+        ingredientsApi.getAll(),
+        stationsApi.getAll(),
+        categoriesApi.getAll(),
+      ]);
+      setMenuItems(items);
+      setDeals(dealRows);
+      setIngredients(ingredientRows);
+      setStations(stationRows);
+      setCategories(categoryRows);
+    } catch (err) {
+      setError('Could not load menu data. ' + err.message);
+    } finally {
+      if (initial) setLoading(false);
     }
-    useEffect(() => {
-        loadAll();
-    }, [])
-    async function handleCreateMenuItem(data) {
-        await menuItemsApi.create(data)
-        await loadAll()
+  }
+
+  useEffect(() => { loadAll({ initial: true }); }, []);
+
+  // Both create handlers now report the outcome instead of letting the rejection escape.
+  // Previously there was no try/catch at all, so a save that failed did nothing visible:
+  // no message, and the row simply never appeared.
+  async function handleCreateMenuItem(data) {
+    try {
+      await menuItemsApi.create(data);
+      await loadAll();
+      return true;
+    } catch (err) {
+      setError('Could not add menu item. ' + err.message);
+      return false;
     }
-    async function handleCreateDeal(data) { 
-        await dealsApi.create(data) 
-        await loadAll()
+  }
+
+  async function handleCreateDeal(data) {
+    try {
+      await dealsApi.create(data);
+      await loadAll();
+      return true;
+    } catch (err) {
+      setError('Could not add deal. ' + err.message);
+      return false;
     }
-    if (loading) return <div style={{padding: 24}}>Loading…</div>;
+  }
+
+  if (loading) return <div className="page">Loading…</div>;
 
   return (
- <div style={{ padding: '24px 20px', maxWidth: 900 }}>
-      <h1 style={{ fontSize: 24, fontWeight: 700, margin: '0 0 16px' }}>Menu &amp; Deals</h1>
+    <div className="page stack">
+      <PageHeader
+        title={'Menu & Deals'}
+        meta={`${menuItems.length} item${menuItems.length === 1 ? '' : 's'} · ${deals.length} deal${deals.length === 1 ? '' : 's'}`}
+      />
 
-      {error && (
-        <div style={{ background: '#fdecea', color: '#a32b1f', padding: '12px 16px', borderRadius: 8, marginBottom: 16, fontSize: 14, border: '1px solid #f3c8c2' }}>
-          {error}
-        </div>
-      )}
+      {error && <Banner tone="danger">{error}</Banner>}
 
+      {/* A setup condition, not a failure — nothing has gone wrong, the shop just hasn't
+          been configured yet. Amber rather than red for that reason. */}
       {stations.length === 0 && (
-        <div style={{ background: '#fdecea', color: '#a32b1f', padding: '12px 16px', borderRadius: 8, marginBottom: 16, fontSize: 14, border: '1px solid #f3c8c2' }}>
-          No printer stations exist yet — add at least one via the API before creating menu items (a menu item can't be created without one).
-        </div>
+        <Banner tone="warn" title="No print stations yet">
+          Add at least one on the <strong>Printers</strong> tab. A menu item can't be
+          created without one, because every item has to know which printer its ticket goes to.
+        </Banner>
       )}
-
-      <MenuItemForm stations={stations} onCreate={handleCreateMenuItem} />
+      <MenuItemForm  categories={categories} stations={stations} onSave={handleCreateMenuItem} />
       <MenuItemList menuItems={menuItems} ingredients={ingredients} stations={stations} />
 
       <DealForm onCreate={handleCreateDeal} />
       <DealList deals={deals} menuItems={menuItems} />
     </div>
-  )
+  );
 }
 
-export default MenuManagementScreen
+export default MenuManagementScreen;

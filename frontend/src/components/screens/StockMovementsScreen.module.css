@@ -1,0 +1,181 @@
+/* Stock Movements. The reference's list-screen shape: a filter rail down the left and the data
+   on the right. Order History uses a similar split, but with the detail panel on the right
+   instead of the filters on the left, because that screen is read one order at a time and this
+   one is scanned across a date range. */
+
+.page {
+  gap: var(--space-4);
+}
+
+.split {
+  display: grid;
+  grid-template-columns: 260px minmax(0, 1fr);
+  gap: var(--space-4);
+  align-items: start;
+}
+
+/* Sticky so the filters stay reachable while a hundred rows are scrolled past. */
+.rail {
+  position: sticky;
+  top: 0;
+}
+
+.railPanel {
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100vh - var(--space-6) * 2);
+}
+
+.railBody {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  overflow-y: auto;
+}
+
+/* Pinned to the bottom of the rail, which is where the reference puts it and where a hand
+   reaches for it after changing three filters rather than before. */
+.railFooter {
+  display: flex;
+  justify-content: flex-end;
+  padding: var(--space-3) var(--space-4);
+  border-top: 1px solid var(--border-subtle);
+  margin-top: auto;
+}
+
+.rangeRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.main {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+/* --- Summary --------------------------------------------------------------- */
+
+.summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+
+.summaryItem {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-3) var(--space-4);
+  background: var(--surface-raised);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+}
+
+.summaryLabel {
+  font-size: var(--text-sm);
+  color: var(--text-subtle);
+}
+
+.summaryValue,
+.summaryValueIn,
+.summaryValueOut {
+  font-size: var(--text-xl);
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+}
+
+.summaryValueIn {
+  color: var(--ok-text);
+}
+
+.summaryValueOut {
+  color: var(--warn-text);
+}
+
+/* --- Table ----------------------------------------------------------------- */
+
+.when {
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+/* The column the screen exists for. Direction is carried by colour as well as the sign, so it
+   survives being skimmed rather than read — but the sign is always there, because colour alone
+   is not something everyone can see. */
+.in {
+  color: var(--ok-text);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.out {
+  color: var(--warn-text);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.unset {
+  color: var(--text-subtle);
+}
+
+/* Notes are free text and can be long; the column wraps rather than pushing the table wide. */
+.reference {
+  color: var(--text-muted);
+  white-space: normal;
+}
+
+/* --- States ---------------------------------------------------------------- */
+
+.state {
+  padding: var(--space-6) var(--space-5);
+  text-align: center;
+  color: var(--text-subtle);
+  font-size: var(--text-md);
+}
+
+.stateTitle {
+  margin: 0 0 var(--space-1);
+  color: var(--text-muted);
+  font-size: var(--text-md);
+  font-weight: var(--weight-medium);
+}
+
+.stateBody {
+  margin: 0;
+  font-size: var(--text-sm);
+}
+
+.pager {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  border-top: 1px solid var(--border-subtle);
+}
+
+.pageCount {
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Below this the rail costs more width than the filters are worth, so it moves above the
+   table and stops being sticky. */
+@media (max-width: 1000px) {
+  .split {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .rail {
+    position: static;
+  }
+
+  .railPanel {
+    max-height: none;
+  }
+}

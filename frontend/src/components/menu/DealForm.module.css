@@ -1,0 +1,28 @@
+/* Same 12-column grid as MenuItemForm. Duplicated rather than shared: it's six lines of
+   layout and the two forms deliberately split their columns differently. */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: var(--space-3);
+  align-items: start;
+}
+
+.span6 { grid-column: span 6; }
+.span3 { grid-column: span 3; }
+
+.actions {
+  grid-column: span 3;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+@media (max-width: 820px) {
+  .span6,
+  .span3,
+  .actions {
+    grid-column: 1 / -1;
+    justify-content: flex-start;
+  }
+}

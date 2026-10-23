@@ -1,23 +1,7 @@
 import { useState } from 'react';
-
-const styles = {
-  panel: { background: '#fff', border: '1px solid #e5e7eb', borderRadius: 12, padding: '18px 20px', marginBottom: 20 },
-  heading: { fontSize: 13, fontWeight: 600, color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: 10 },
-  label: { display: 'block', fontSize: 12, color: '#6b7280', fontWeight: 600, marginBottom: 4 },
-  field: { marginBottom: 12 },
-  select: { width: '100%', maxWidth: 320, padding: '10px 12px', fontSize: 14, border: '1px solid #d1d5db', borderRadius: 8, color: '#22262b', background: '#fafafa' },
-  lineRow: { display: 'flex', gap: 8, alignItems: 'center', marginBottom: 8, flexWrap: 'wrap' },
-  lineSelect: { flex: '1 1 220px', padding: '9px 11px', fontSize: 14, border: '1px solid #d1d5db', borderRadius: 8, color: '#22262b', background: '#fafafa' },
-  lineInput: { flex: '0 1 110px', padding: '9px 11px', fontSize: 14, border: '1px solid #d1d5db', borderRadius: 8, color: '#22262b', background: '#fafafa' },
-  lineMeta: { flex: '0 0 90px', fontSize: 13, color: '#6b7280', textAlign: 'right' },
-  remove: { padding: '9px 12px', fontSize: 13, fontWeight: 600, background: '#fff', color: '#a32b1f', border: '1px solid #f3c8c2', borderRadius: 8, cursor: 'pointer' },
-  addLine: { padding: '8px 14px', fontSize: 13, fontWeight: 600, background: '#fff', color: '#2563eb', border: '1px dashed #93b4f5', borderRadius: 8, cursor: 'pointer' },
-  totalBar: { display: 'flex', gap: 24, flexWrap: 'wrap', alignItems: 'flex-end', borderTop: '1px solid #f0f1f3', paddingTop: 14, marginTop: 14 },
-  summary: { fontSize: 14, color: '#22262b' },
-  summaryStrong: { fontSize: 15, fontWeight: 700 },
-  button: { padding: '10px 18px', fontSize: 14, fontWeight: 600, background: '#2563eb', color: '#fff', border: 'none', borderRadius: 8, cursor: 'pointer' },
-  hint: { fontSize: 12, color: '#9ca3af', marginTop: 6 },
-};
+import { formatMoney } from '../../lib/money';
+import { Panel, Field, Input, Select, Button } from '../ui';
+import styles from './PurchaseForm.module.css';
 
 const emptyLine = () => ({ ingredient_id: '', quantity: '', unit_cost: '' });
 
@@ -90,22 +74,34 @@ function PurchaseForm({ suppliers = [], ingredients = [], onCreate }) {
   }
 
   return (
-    <div style={styles.panel}>
-      <div style={styles.heading}>Record a purchase</div>
-      <form onSubmit={handleSubmit}>
-        <div style={styles.field}>
-          <label style={styles.label}>Supplier</label>
-          <select style={styles.select} value={supplierId} onChange={(e) => setSupplierId(e.target.value)}>
-            {suppliers.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
-          </select>
-        </div>
+    <Panel title="Record a purchase">
+      <form onSubmit={handleSubmit} className={styles.grid}>
+        <Field label="Supplier">
+          <Select value={supplierId} onChange={(e) => setSupplierId(e.target.value)}>
+            {suppliers.map((s) => (
+              <option key={s.id} value={s.id}>{s.name}</option>
+            ))}
+          </Select>
+        </Field>
 
-        <div style={styles.field}>
-          <label style={styles.label}>Items received</label>
+        <fieldset className={styles.group}>
+          <legend className={styles.legend}>Items received</legend>
+
+          {/* Repeated rows can't each carry a visible label without turning the form into
+              a wall of text, so the column headings carry it for sighted users and
+              aria-label carries it for everyone else. */}
+          <div className={styles.lineHead} aria-hidden="true">
+            <span>Ingredient</span>
+            <span>Qty</span>
+            <span>Rs. / unit</span>
+            <span className={styles.right}>Line total</span>
+            <span />
+          </div>
+
           {lines.map((line, index) => (
-            <div key={index} style={styles.lineRow}>
-              <select
-                style={styles.lineSelect}
+            <div key={index} className={styles.lineRow}>
+              <Select
+                aria-label={`Ingredient for line ${index + 1}`}
                 value={line.ingredient_id}
                 onChange={(e) => updateLine(index, { ingredient_id: e.target.value })}
               >
@@ -113,55 +109,70 @@ function PurchaseForm({ suppliers = [], ingredients = [], onCreate }) {
                 {ingredients.map((ing) => (
                   <option key={ing.id} value={ing.id}>{ing.name} ({ing.unit})</option>
                 ))}
-              </select>
-              <input
-                style={styles.lineInput}
+              </Select>
+              <Input
+                aria-label={`Quantity for line ${index + 1}`}
                 type="number" min="0" step="0.01" placeholder="Qty"
                 value={line.quantity}
                 onChange={(e) => updateLine(index, { quantity: e.target.value })}
               />
-              <input
-                style={styles.lineInput}
-                type="number" min="0" step="0.01" placeholder="Rs. / unit"
+              <Input
+                aria-label={`Unit cost for line ${index + 1}`}
+                type="number" min="0" step="0.01" placeholder="0.00"
                 value={line.unit_cost}
                 onChange={(e) => updateLine(index, { unit_cost: e.target.value })}
               />
-              <span style={styles.lineMeta}>
+              <span className={styles.lineTotal}>
                 {line.quantity && line.unit_cost
-                  ? `Rs. ${(Math.round(Number(line.quantity) * Number(line.unit_cost) * 100) / 100).toLocaleString()}`
+                  ? formatMoney(Math.round(Number(line.quantity) * Number(line.unit_cost) * 100))
                   : '—'}
               </span>
-              <button type="button" style={styles.remove} onClick={() => removeLine(index)}>Remove</button>
+              <Button
+                variant="dangerGhost"
+                size="sm"
+                aria-label={`Remove line ${index + 1}`}
+                onClick={() => removeLine(index)}
+              >
+                Remove
+              </Button>
             </div>
           ))}
-          <button type="button" style={styles.addLine} onClick={addLine}>+ Add another item</button>
-        </div>
 
-        <div style={styles.totalBar}>
-          <div style={styles.field}>
-            <label style={styles.label}>Paid upfront (Rs.)</label>
-            <input
-              style={styles.lineInput}
+          <Button variant="secondary" size="sm" className={styles.addLine} onClick={addLine}>
+            + Add another item
+          </Button>
+        </fieldset>
+
+        <div className={styles.totalBar}>
+          <Field
+            label="Paid upfront (Rs.)"
+            hint="Leave blank if nothing was paid now."
+            className={styles.paid}
+          >
+            <Input
               type="number" min="0" step="0.01" placeholder="0"
               value={amountPaid}
               onChange={(e) => setAmountPaid(e.target.value)}
             />
-            <div style={styles.hint}>Leave blank if nothing was paid now.</div>
-          </div>
-          <div style={styles.summary}>
-            <div>Purchase total: <strong>Rs. {(totalCents / 100).toLocaleString()}</strong></div>
-            <div style={styles.summaryStrong}>
+          </Field>
+
+          <div className={styles.summary}>
+            <div>
+              Purchase total: <strong>{formatMoney(totalCents)}</strong>
+            </div>
+            <div className={styles.summaryStrong}>
               {owedCents >= 0
-                ? <>Added to supplier balance: Rs. {(owedCents / 100).toLocaleString()}</>
-                : <>Overpaid by Rs. {(-owedCents / 100).toLocaleString()} — this will reduce an existing balance.</>}
+                ? <>Added to supplier balance: {formatMoney(owedCents)}</>
+                : <>Overpaid by {formatMoney(-owedCents)} — this will reduce an existing balance.</>}
             </div>
           </div>
-          <button type="submit" style={styles.button} disabled={submitting}>
+
+          <Button type="submit" variant="primary" className={styles.submit} disabled={submitting}>
             {submitting ? 'Saving…' : 'Record purchase'}
-          </button>
+          </Button>
         </div>
       </form>
-    </div>
+    </Panel>
   );
 }
 

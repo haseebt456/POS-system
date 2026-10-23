@@ -1,54 +1,154 @@
-const styles = {
-  sectionTitle: { fontSize: 13, fontWeight: 600, color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.04em', margin: '18px 0 10px' },
-  grid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: 10 },
-  card: {
-    background: '#ffffff', border: '1px solid #e5e7eb', borderRadius: 12,
-    padding: '16px 14px', cursor: 'pointer', textAlign: 'left',
-    boxShadow: '0 1px 2px rgba(16, 24, 40, 0.04)', transition: 'border-color 0.1s',
-  },
-  cardDeal: { borderColor: '#fbbf24', background: '#fffbeb' },
-  cardName: { fontSize: 15, fontWeight: 600, color: '#22262b', marginBottom: 4 },
-  cardPrice: { fontSize: 14, color: '#2563eb', fontWeight: 600 },
-  dealBadge: {
-    fontSize: 10, fontWeight: 700, color: '#92400e', background: '#fde68a',
-    padding: '2px 6px', borderRadius: 4, marginBottom: 6, display: 'inline-block',
-    textTransform: 'uppercase', letterSpacing: '0.03em',
-  },
-  empty: { fontSize: 14, color: '#9ca3af', gridColumn: '1 / -1' },
-};
+import { useMemo, useState } from 'react';
+import { Badge, Input } from '../ui';
+import { cx } from '../../lib/cx';
+import { formatMoney } from '../../lib/money';
+import styles from './MenuGrid.module.css';
 
-function formatPrice(cents) {
-  return `Rs. ${(cents / 100).toFixed(0)}`;
-}
+// Deals are not categorised, so they are offered as a pseudo-category rather than as a special
+// case the filter has to know about. One axis, no branches in the render.
+const ALL = '__all__';
+const DEALS = '__deals__';
 
 function MenuGrid({ menuItems, deals, onAddMenuItem, onAddDeal }) {
+  const [search, setSearch] = useState('');
+  const [tab, setTab] = useState(ALL);
+
+  // Only what the manager has left on sale. Read here rather than trusted to the server because
+  // no route writes `is_available` yet — M6 adds PUT /api/menu-items/:id. So today this filters
+  // nothing, and is already correct on the day the flag starts moving. Note it is presentation
+  // only: POST /orders would still accept an unavailable item. See HANDOFF.md §5.
+  const sellable = useMemo(
+    () => menuItems.filter((item) => item.is_available !== 0),
+    [menuItems]
+  );
+
+  const categories = useMemo(() => {
+    const names = new Set(
+      sellable.map((item) => (item.category ?? '').trim()).filter(Boolean)
+    );
+    return [...names].sort((a, b) => a.localeCompare(b));
+  }, [sellable]);
+
+  const tabs = useMemo(
+    () => [
+      { id: ALL, label: 'All' },
+      ...(deals.length > 0 ? [{ id: DEALS, label: 'Deals' }] : []),
+      ...categories.map((name) => ({ id: name, label: name })),
+    ],
+    [deals.length, categories]
+  );
+
+  // The catalogue is reloaded after every order, so a selected category can vanish underneath
+  // the operator. Falling back here rather than in an effect keeps the tab row and the grid
+  // rendered from one value — an effect would paint a frame of the stale tab first.
+  const activeTab = tabs.some((entry) => entry.id === tab) ? tab : ALL;
+
+  const needle = search.trim().toLowerCase();
+  const hits = (name) => needle === '' || name.toLowerCase().includes(needle);
+
+  const visibleDeals = deals.filter((deal) => hits(deal.name));
+  const visibleItems = sellable.filter(
+    (item) =>
+      hits(item.name) && (activeTab === ALL || (item.category ?? '').trim() === activeTab)
+  );
+
+  // An empty section under a search is noise: the operator already knows what they typed, and a
+  // "no deals match" heading above three matching burgers is something to read past.
+  const showDeals = (activeTab === ALL || activeTab === DEALS) && (needle === '' || visibleDeals.length > 0);
+  const showItems = activeTab !== DEALS && (needle === '' || visibleItems.length > 0);
+
   return (
-    <div>
-      <div style={styles.sectionTitle}>Deals</div>
-      <div style={styles.grid}>
-        {deals.length === 0 && <span style={styles.empty}>No deals yet.</span>}
-        {deals.map((deal) => (
-          <button key={deal.id} style={{ ...styles.card, ...styles.cardDeal }} onClick={() => onAddDeal(deal)}>
-            <span style={styles.dealBadge}>Deal</span>
-            <div style={styles.cardName}>{deal.name}</div>
-            <div style={styles.cardPrice}>{formatPrice(deal.price_cents)}</div>
-          </button>
-        ))}
+    <div className={styles.wrap}>
+      {/* Stays at the top of the menu column while the grid scrolls under it — search is
+          something the operator reaches for mid-order, not before starting one. */}
+      <div className={styles.controls}>
+        <Input
+          type="search"
+          className={styles.search}
+          placeholder="Search the menu…"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          aria-label="Search the menu"
+        />
+
+        {tabs.length > 2 && (
+          <div className={styles.tabs} role="tablist" aria-label="Menu category">
+            {tabs.map((entry) => (
+              <button
+                key={entry.id}
+                type="button"
+                role="tab"
+                aria-selected={activeTab === entry.id}
+                className={cx(styles.tab, activeTab === entry.id && styles.tabActive)}
+                onClick={() => setTab(entry.id)}
+              >
+                {entry.label}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
-      <div style={styles.sectionTitle}>Menu Items</div>
-      <div style={styles.grid}>
-        {menuItems.length === 0 && <span style={styles.empty}>No menu items yet.</span>}
-        {menuItems.map((item) => (
-          <button key={item.id} style={styles.card} onClick={() => onAddMenuItem(item)}>
-            <div style={styles.cardName}>{item.name}</div>
-            <div style={styles.cardPrice}>{formatPrice(item.price_cents)}</div>
-          </button>
-        ))}
-      </div>
+      {showDeals && (
+        <section>
+          <h2 className={styles.sectionTitle}>Deals</h2>
+          <div className={styles.grid}>
+            {visibleDeals.length === 0 ? (
+              <p className={styles.empty}>No deals yet.</p>
+            ) : (
+              visibleDeals.map((deal) => (
+                <button
+                  key={deal.id}
+                  type="button"
+                  className={cx(styles.card, styles.dealCard)}
+                  onClick={() => onAddDeal(deal)}
+                >
+                  <Badge tone="deal" shape="square" className={styles.badge}>Deal</Badge>
+                  <span className={styles.name}>{deal.name}</span>
+                  <span className={cx(styles.price, styles.dealPrice)}>
+                    {formatMoney(deal.price_cents)}
+                  </span>
+                </button>
+              ))
+            )}
+          </div>
+        </section>
+      )}
+
+      {showItems && (
+        <section>
+          {/* The heading is only useful when the section sits under another one. On a category
+              tab the tab itself is the heading, and repeating it just costs vertical space. */}
+          {activeTab === ALL && <h2 className={styles.sectionTitle}>Menu items</h2>}
+          <div className={styles.grid}>
+            {visibleItems.length === 0 ? (
+              <p className={styles.empty}>
+                {activeTab === ALL ? 'No menu items yet.' : `Nothing in ${activeTab}.`}
+              </p>
+            ) : (
+              visibleItems.map((item) => (
+                <button
+                  key={item.id}
+                  type="button"
+                  className={styles.card}
+                  onClick={() => onAddMenuItem(item)}
+                >
+                  <span className={styles.name}>{item.name}</span>
+                  <span className={styles.price}>{formatMoney(item.price_cents)}</span>
+                </button>
+              ))
+            )}
+          </div>
+        </section>
+      )}
+
+      {/* Reached only while searching: both sections hide themselves when they have no hits, and
+          a blank column reads as a broken screen rather than as "nothing matched". */}
+      {!showDeals && !showItems && (
+        <p className={styles.empty}>Nothing on the menu matches “{search.trim()}”.</p>
+      )}
     </div>
   );
 }
 
 export default MenuGrid;
-export { formatPrice };

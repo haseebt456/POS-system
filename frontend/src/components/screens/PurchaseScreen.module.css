@@ -1,0 +1,63 @@
+.paymentRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--space-3);
+  margin-top: var(--space-4);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--border-subtle);
+}
+
+.paymentLabel {
+  font-size: var(--text-md);
+  color: var(--text-muted);
+  padding-bottom: 9px;
+}
+
+.amountField {
+  width: 160px;
+}
+
+.supplierForm {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
+  gap: var(--space-3);
+  align-items: end;
+  margin-top: var(--space-4);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--border-subtle);
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.balance {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.settled {
+  color: var(--text-muted);
+}
+
+.amount {
+  font-variant-numeric: tabular-nums;
+}
+
+.subItems {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  font-size: var(--text-base);
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 720px) {
+  .supplierForm {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

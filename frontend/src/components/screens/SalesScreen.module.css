@@ -1,0 +1,67 @@
+.screen {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 340px;
+  gap: var(--space-5);
+  padding: var(--space-5) var(--page-gutter);
+}
+
+/* A *fixed* rail, not a ratio. The old layout was `2fr 1fr`, so widening the window made
+   the cart wider — backwards, since the cart holds a handful of short strings while the
+   menu holds every product the shop sells. Extra width goes to the menu.
+
+   minmax(0, 1fr) here and min-width: 0 below are load-bearing, not decoration: a grid
+   item defaults to min-width: auto, meaning "never shrink below my content", so the
+   longest product name widens its column and squeezes the rail instead of wrapping. */
+.left {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  min-width: 0;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.rail {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  min-height: 0;
+}
+
+/* Banners refuse to shrink in the column — an announcement squeezed to one clipped line
+   is worse than no announcement. */
+.warning {
+  flex: none;
+}
+
+/* The print-failure list inside the warning banner. Banner supplies the box; this is
+   just a plain list of lines inside it. */
+.failures {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.failures li + li {
+  margin-top: var(--space-1);
+}
+
+/* Safety net for a window narrower than the till's 900px. Below this the two columns
+   stop fitting side by side, so the screen falls back to a normal scrolling document
+   rather than letting the panels be clipped by the fixed-height shell. */
+@media (max-width: 860px) {
+  .screen {
+    display: block;
+    overflow-y: auto;
+  }
+
+  .left {
+    overflow: visible;
+  }
+
+  .rail {
+    margin-top: var(--space-5);
+  }
+}

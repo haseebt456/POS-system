@@ -1,0 +1,51 @@
+/* Physical-count mode is a distinct state, not just another panel, so it gets a ring.
+   Done with outline rather than border-color because Panel already sets a `border`
+   shorthand from its own module, and which of the two wins would depend on stylesheet
+   order between the modules — a silent, order-dependent bug. Outline composes instead
+   of competing. */
+.counting {
+  outline: 2px solid var(--brand);
+  outline-offset: -2px;
+}
+
+.sub {
+  margin-bottom: var(--space-4);
+  font-size: var(--text-md);
+  color: var(--text-muted);
+  max-width: 70ch;
+}
+
+.countWrap {
+  display: inline-block;
+  width: 110px;
+}
+
+.varianceUp {
+  color: var(--ok-text);
+  font-weight: var(--weight-semibold);
+  font-variant-numeric: tabular-nums;
+}
+
+.varianceDown {
+  color: var(--danger-text);
+  font-weight: var(--weight-semibold);
+  font-variant-numeric: tabular-nums;
+}
+
+.varianceSame {
+  color: var(--text-subtle);
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-top: var(--space-4);
+  flex-wrap: wrap;
+}
+
+.summary {
+  margin-left: auto;
+  font-size: var(--text-base);
+  color: var(--text-muted);
+}

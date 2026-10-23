@@ -1,0 +1,67 @@
+/* Same row structure as MenuItemList, tinted amber. Deals are a different kind of thing
+   from a menu item — a composed bundle rather than a single product — and the tint says
+   so before the heading is read. */
+.item {
+  border-bottom: 1px solid var(--deal-border);
+}
+
+.item:last-child {
+  border-bottom: none;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  padding: var(--space-3) var(--space-5);
+  background: none;
+  border: none;
+  text-align: left;
+  transition: background-color var(--transition-fast);
+}
+
+.row:hover {
+  background: var(--warn-bg-subtle);
+}
+
+.main {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  gap: 1px;
+  min-width: 0;
+}
+
+.name {
+  font-size: var(--text-md);
+  font-weight: var(--weight-semibold);
+  color: var(--text);
+}
+
+.price {
+  flex: none;
+  font-size: var(--text-md);
+  font-weight: var(--weight-semibold);
+  /* The deal brown rather than the brand rose: a rose price inside an amber panel reads
+     as an error, and this one is the whole point of the deal. */
+  color: var(--deal-text);
+  font-variant-numeric: tabular-nums;
+}
+
+.caret {
+  flex: none;
+  width: 12px;
+  font-size: var(--text-sm);
+  color: var(--deal-text);
+  text-align: center;
+}
+
+/* --text-muted, not the --text-subtle every other empty state uses: on the amber deal
+   background that grey drops to roughly 2.5:1. Darker keeps it legible without making
+   "No deals yet" read as a warning. */
+.empty {
+  padding: var(--space-2) var(--space-5) var(--space-5);
+  font-size: var(--text-md);
+  color: var(--text-muted);
+}

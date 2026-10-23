@@ -1,0 +1,296 @@
+/* Order History. Two columns once an order is selected: the list keeps its width and the
+   detail appears beside it rather than over it, so the row that was clicked stays visible
+   while its contents are read. Same shape as the POS itself, which is the layout an
+   operator already knows. */
+
+.page {
+  gap: var(--space-4);
+}
+
+.split {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(320px, 380px);
+  gap: var(--space-4);
+  align-items: start;
+}
+
+/* min-width: 0 is what stops a long ticket number in the table from widening the grid
+   column and pushing the detail panel off the edge. */
+.main {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.filters {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+}
+
+.rangeRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.filterGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: var(--space-3);
+}
+
+/* The ticket search gets the leftover width — it is the one field someone types into,
+   and a ticket number is longer than a date. */
+.searchField {
+  grid-column: span 2;
+  min-width: 180px;
+}
+
+/* --- Table ---------------------------------------------------------------- */
+
+.time {
+  font-variant-numeric: tabular-nums;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.ticket {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  color: var(--text);
+  white-space: nowrap;
+}
+
+.total {
+  font-variant-numeric: tabular-nums;
+  font-weight: var(--weight-semibold);
+  white-space: nowrap;
+}
+
+.unset {
+  color: var(--text-subtle);
+}
+
+/* Clickable rows. The hover and pointer are the only affordance a table row has for
+   "this opens something", so both are stated rather than left to chance.
+   Scoped under .main on purpose: a bare `tbody tr` is a global selector even inside a CSS
+   module, and would set the cursor on every table in the app. */
+.main tbody tr {
+  cursor: pointer;
+}
+
+.main tbody tr:hover td {
+  background: var(--surface-hover);
+}
+
+.selectedRow td {
+  background: var(--brand-subtle);
+}
+
+.selectedRow td:first-child {
+  box-shadow: inset 2px 0 0 var(--brand);
+}
+
+/* --- States --------------------------------------------------------------- */
+
+.state {
+  padding: var(--space-6) var(--space-5);
+  text-align: center;
+  color: var(--text-subtle);
+  font-size: var(--text-md);
+}
+
+.stateTitle {
+  margin: 0 0 var(--space-1);
+  color: var(--text-muted);
+  font-size: var(--text-md);
+  font-weight: var(--weight-medium);
+}
+
+.stateBody {
+  margin: 0;
+  font-size: var(--text-sm);
+}
+
+.pager {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  border-top: 1px solid var(--border-subtle);
+}
+
+.pageCount {
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* --- Detail --------------------------------------------------------------- */
+
+/* Sticky so the panel stays in view while the (possibly long) list is scrolled past it,
+   and capped to the viewport so a 30-line order scrolls inside the panel instead of
+   growing the page. */
+.detail {
+  position: sticky;
+  top: 0;
+}
+
+.detailPanel {
+  max-height: calc(100vh - var(--space-6) * 2);
+  display: flex;
+  flex-direction: column;
+}
+
+.detailBody {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  overflow-y: auto;
+  padding: var(--space-4);
+}
+
+.facts {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-2) var(--space-3);
+  margin: 0;
+}
+
+.facts div,
+.money div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.facts dt,
+.money dt {
+  font-size: var(--text-sm);
+  color: var(--text-subtle);
+}
+
+.facts dd,
+.money dd {
+  margin: 0;
+  font-size: var(--text-md);
+  color: var(--text);
+}
+
+.sectionTitle {
+  margin: 0 0 var(--space-2);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-subtle);
+}
+
+.lines {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+/* Quantity, name, amount. The name wraps rather than truncating — an item name cut off
+   with an ellipsis is how the wrong line gets read back to a customer. */
+.line {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: var(--space-2);
+  align-items: baseline;
+  font-size: var(--text-md);
+}
+
+.lineQty {
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.lineName {
+  min-width: 0;
+}
+
+.lineAmount {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* "2x Burger" under a combo line — what the bundle actually contained, which is what the
+   kitchen ticket showed and what the customer received. */
+.lineNote {
+  grid-column: 2 / -1;
+  font-size: var(--text-sm);
+  color: var(--text-subtle);
+}
+
+.money {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  margin: 0;
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--border-subtle);
+}
+
+.money div {
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--space-3);
+}
+
+.money dd {
+  font-variant-numeric: tabular-nums;
+}
+
+.discount dd {
+  color: var(--ok-text);
+}
+
+.reason {
+  color: var(--text-subtle);
+}
+
+/* The one number the panel exists to answer. */
+.grandTotal {
+  margin-top: var(--space-2);
+  padding-top: var(--space-2);
+  border-top: 1px solid var(--border);
+}
+
+.grandTotal dt,
+.grandTotal dd {
+  font-size: var(--text-lg);
+  font-weight: var(--weight-semibold);
+  color: var(--text);
+}
+
+.footNote {
+  margin: 0;
+  font-size: var(--text-sm);
+  color: var(--text-subtle);
+}
+
+/* Below this the two columns stop fitting: the detail panel takes the full width and the
+   order list sits above it. */
+@media (max-width: 1000px) {
+  .split {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .detail {
+    position: static;
+  }
+
+  .detailPanel {
+    max-height: none;
+  }
+}

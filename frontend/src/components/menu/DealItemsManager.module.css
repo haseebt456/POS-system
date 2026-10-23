@@ -1,0 +1,67 @@
+/* The expanded detail area under a deal row. No background of its own — it sits inside
+   the amber deal panel, and a grey inset there would fight the tint. The top rule uses
+   the deal border so the nesting reads at a glance. */
+.wrap {
+  padding: var(--space-3) var(--space-5) var(--space-4);
+  border-top: 1px solid var(--deal-border);
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  margin-bottom: var(--space-2);
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-base);
+  color: var(--text);
+}
+
+.qty {
+  font-weight: var(--weight-semibold);
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.note {
+  margin-bottom: var(--space-3);
+  font-size: var(--text-sm);
+  color: var(--deal-text);
+}
+
+.addRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.select {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.count {
+  flex: 0 0 76px;
+}
+
+.empty {
+  margin-bottom: var(--space-2);
+  font-size: var(--text-base);
+  color: var(--text-muted);
+}
+
+.error {
+  margin-bottom: var(--space-2);
+  font-size: var(--text-base);
+  color: var(--danger-text);
+}
+
+@media (max-width: 820px) {
+  .addRow {
+    flex-wrap: wrap;
+  }
+}

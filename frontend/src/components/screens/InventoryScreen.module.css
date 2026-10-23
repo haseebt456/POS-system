@@ -1,0 +1,136 @@
+/* Stock. Same list-screen shape as Stock Movements — a filter rail down the left, data on the
+   right — so the two Inventory screens are read the same way rather than each inventing a
+   layout. See StockMovementsScreen.module.css for the original of this pattern. */
+
+.page {
+  gap: var(--space-4);
+}
+
+.split {
+  display: grid;
+  grid-template-columns: 260px minmax(0, 1fr);
+  gap: var(--space-4);
+  align-items: start;
+}
+
+.rail {
+  position: sticky;
+  top: 0;
+}
+
+.railPanel {
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100vh - var(--space-6) * 2);
+}
+
+.railBody {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  overflow-y: auto;
+}
+
+.railFooter {
+  display: flex;
+  justify-content: flex-end;
+  padding: var(--space-3) var(--space-4);
+  border-top: 1px solid var(--border-subtle);
+  margin-top: auto;
+}
+
+.check {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.check input {
+  accent-color: var(--brand);
+}
+
+.main {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+/* --- Summary --------------------------------------------------------------- */
+
+.summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+
+.summaryItem {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-3) var(--space-4);
+  background: var(--surface-raised);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+}
+
+.summaryLabel {
+  font-size: var(--text-sm);
+  color: var(--text-subtle);
+}
+
+.summaryValue {
+  font-size: var(--text-xl);
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+}
+
+/* Low stock is the number on this screen that somebody has to act on, so it is the one that
+   changes colour — and only while it is non-zero, because a permanently amber tile teaches
+   people to stop reading it. */
+.summaryValueWarn {
+  color: var(--warn-text);
+}
+
+.summaryValueMuted {
+  color: var(--text-muted);
+}
+
+/* --- States ---------------------------------------------------------------- */
+
+.state {
+  padding: var(--space-6) var(--space-5);
+  text-align: center;
+  color: var(--text-subtle);
+  font-size: var(--text-md);
+}
+
+.stateTitle {
+  margin: 0 0 var(--space-1);
+  color: var(--text-muted);
+  font-size: var(--text-md);
+  font-weight: var(--weight-medium);
+}
+
+.stateBody {
+  margin: 0;
+  font-size: var(--text-sm);
+}
+
+@media (max-width: 1000px) {
+  .split {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .rail {
+    position: static;
+  }
+
+  .railPanel {
+    max-height: none;
+  }
+}

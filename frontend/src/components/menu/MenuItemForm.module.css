@@ -1,0 +1,62 @@
+/* A 12-column grid so the fields land in predictable places. The previous flex-wrap row
+   packed controls at their natural widths, so where they wrapped changed with the length
+   of the content — and at 900px they wrapped differently than at 1400px.
+
+   `align-items: start` rather than `end`: it keeps the labels level with each other and
+   the controls level with each other, and lets a validation message hang below its field
+   without shoving that field's control upward. */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: var(--space-3);
+  align-items: start;
+}
+
+.span6 { grid-column: span 6; }
+.span4 { grid-column: span 4; }
+.span3 { grid-column: span 3; }
+.span2 { grid-column: span 2; }
+
+.check {
+  grid-column: span 4;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 38px;
+  margin-top: 22px;
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.check input {
+  accent-color: var(--brand);
+}
+
+/* Its own row, so the Add button never competes for space with a field and never
+   changes position as the fields above it grow or shrink. */
+.actions {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+@media (max-width: 820px) {
+  .span6,
+  .span4,
+  .span3,
+  .span2,
+  .check {
+    grid-column: 1 / -1;
+  }
+
+  .check {
+    margin-top: 0;
+  }
+
+  .actions {
+    justify-content: flex-start;
+  }
+}

@@ -1,0 +1,102 @@
+/* The row is a real <button>, not a <div onClick>. As a div the whole expand/collapse
+   gesture had no tab stop, no Enter/Space activation, and nothing to tell a screen
+   reader that the row opens anything at all. A button gets all three for free. */
+.item {
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.item:last-child {
+  border-bottom: none;
+}
+
+.rowWrap {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding-right: var(--space-3);
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex: 1;
+  min-width: 0;
+  padding: var(--space-3) var(--space-5);
+  background: none;
+  border: none;
+  text-align: left;
+  transition: background-color var(--transition-fast);
+}
+
+.thumb,
+.thumbPlaceholder {
+  flex: none;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-md);
+  object-fit: cover;
+  background: var(--surface-sunken);
+}
+
+.thumbPlaceholder {
+  border: 1px dashed var(--border);
+}
+
+.rowActions {
+  display: flex;
+  flex: none;
+  gap: var(--space-1);
+}
+
+.row:hover {
+  background: var(--surface-hover);
+}
+
+.main {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  gap: 1px;
+  /* Flex items default to min-width:auto, so a long item name refuses to shrink and
+     pushes the price off the right edge of the panel. */
+  min-width: 0;
+}
+
+.name {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-md);
+  font-weight: var(--weight-semibold);
+  color: var(--text);
+}
+
+.meta {
+  font-size: var(--text-sm);
+  color: var(--text-subtle);
+}
+
+.price {
+  flex: none;
+  font-size: var(--text-md);
+  font-weight: var(--weight-semibold);
+  color: var(--brand);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Opens/closes indicator. Without it nothing on the row says it can be expanded — the
+   pointer cursor was the only cue, and that cue doesn't exist for a keyboard user. */
+.caret {
+  flex: none;
+  width: 12px;
+  font-size: var(--text-sm);
+  color: var(--text-subtle);
+  text-align: center;
+}
+
+.empty {
+  padding: var(--space-2) var(--space-5) var(--space-5);
+  font-size: var(--text-md);
+  color: var(--text-subtle);
+}
