@@ -1,5 +1,17 @@
 {
+  "main": "main.js",
   "dependencies": {
-    "better-sqlite3": "^13.0.3"
+    "bcryptjs": "^2.4.3",
+    "better-sqlite3": "^13.0.3",
+    "cors": "^2.8.6",
+    "express": "^5.2.1"
+  },
+  "devDependencies": {
+    "electron": "^44.4.1"
+  },
+  "scripts": {
+    "start": "electron .",
+    "setup": "node setup.js",
+    "test": "node test/run.js"
   }
 }

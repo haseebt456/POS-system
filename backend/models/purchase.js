@@ -1,5 +1,5 @@
 const db = require('../db');
-const { adjustStockByDelta } = require('./ingredient');
+const { applyStockMovement } = require('./ingredient');
 const { adjustSupplierBalance } = require('./supplier');
 
 // Creates a purchase: records the transaction, adds stock for every ingredient
@@ -29,8 +29,18 @@ function createPurchase({ supplier_id, items, amount_paid_cents = 0, created_by 
 
         for (const item of items) {
             insertItem.run(purchaseId, item.ingredient_id, item.quantity, item.unit_cost_cents);
-            // Stock goes UP on a purchase — positive delta, opposite of order completion
-            adjustStockByDelta(item.ingredient_id, item.quantity);
+            // Stock goes UP on a purchase — positive delta, opposite of order completion.
+            // Recorded with the purchase it came from, so the ledger can answer "where did
+            // this delivery go" as well as "why did the number change".
+            applyStockMovement({
+                ingredient_id: item.ingredient_id,
+                delta: item.quantity,
+                reason: 'purchase',
+                ref_type: 'purchase',
+                ref_id: purchaseId,
+                note: `Received on purchase #${purchaseId}`,
+                created_by,
+            });
         }
 
         const amountOwed = total_amount_cents - amount_paid_cents;

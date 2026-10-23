@@ -13,7 +13,7 @@ const FOOTER_TEXT = 'Lucky Fast Food';
 // multiplier can't be recovered from them afterwards.
 const ORDER_ITEMS_SQL = `
     SELECT oi.id, oi.menu_item_id, oi.station_id, oi.quantity, oi.unit_price_cents,
-           oi.deal_id, oi.deal_quantity, oi.print_status,
+           oi.line_total_cents, oi.deal_id, oi.deal_quantity, oi.print_status,
            mi.name AS menu_item_name,
            d.name  AS deal_name
     FROM order_items oi
@@ -100,23 +100,25 @@ function buildReceiptDocument(orderId) {
 
     for (const item of items) {
         if (item.deal_id) {
-            // First row of a deal carries the whole deal price; the rest are priced 0
-            // (see expandDealToOrderItems). Rows are id-ordered, so the first one seen
-            // per deal is the priced one — that's the price snapshot.
+            // The deal's money is snapshotted on its first component row as line_total_cents
+            // (see expandDealToOrderItems). Rows are id-ordered, so the first one seen per
+            // deal is the priced one. This used to be recomputed as deal_quantity x
+            // unit_price_cents, which quietly disagreed with the order total for any deal
+            // whose first component had a quantity above 1 — the receipt should print the
+            // number the customer was charged, not a second opinion about it.
             if (seenDeals.has(item.deal_id)) continue;
             seenDeals.add(item.deal_id);
 
-            const dealQty = item.deal_quantity ?? 1;
             lines.push({
                 name: item.deal_name ?? 'Deal',
-                quantity: dealQty,
-                amount_cents: dealQty * item.unit_price_cents,
+                quantity: item.deal_quantity ?? 1,
+                amount_cents: item.line_total_cents ?? 0,
             });
         } else {
             lines.push({
                 name: item.menu_item_name,
                 quantity: item.quantity,
-                amount_cents: item.quantity * item.unit_price_cents,
+                amount_cents: item.line_total_cents ?? item.quantity * item.unit_price_cents,
             });
         }
     }

@@ -4,17 +4,26 @@ const {
     createMenuItem,
     getAllMenuItems,
     getMenuItemById,
+    updateMenuItem,
     deactivateMenuItem,
+    saveMenuItemImage,
     addRecipeItem,
     getRecipeForMenuItem,
     updateRecipeItemQuantity,
     removeRecipeItem,
 } = require('../models/menuItem');
+const { forRole } = require('../middleware/auth');
 
 // GET /api/menu-items
 router.get('/', (req, res) => {
     try {
-        res.json(getAllMenuItems());
+        // cost_cents is removed here, not hidden in the table. Leaving the column out of the
+        // JSX still ships every cost in the JSON that built the row, and an operator can read
+        // that from the network tab in seconds. The number has to not cross the wire.
+        //
+        // forRole() returns the array untouched for an admin, so this call site is the same
+        // for both roles and there is no branch to get wrong.
+        res.json(forRole(req, 'menuItem', getAllMenuItems()));
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
@@ -25,7 +34,7 @@ router.get('/:id', (req, res) => {
     try {
         const item = getMenuItemById(req.params.id);
         if (!item) return res.status(404).json({ error: 'Menu item not found' });
-        res.json(item);
+        res.json(forRole(req, 'menuItem', item));
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
@@ -36,6 +45,29 @@ router.post('/', (req, res) => {
     try {
         const id = createMenuItem(req.body);
         res.status(201).json({ id });
+    } catch (err) {
+        res.status(400).json({ error: err.message });
+    }
+});
+
+// PUT /api/menu-items/:id
+router.put('/:id', (req, res) => {
+    try {
+        const item = updateMenuItem(req.params.id, req.body);
+        res.json(forRole(req, 'menuItem', item));
+    } catch (err) {
+        res.status(400).json({ error: err.message });
+    }
+});
+
+// POST /api/menu-items/:id/image  body: { data_url }
+// JSON rather than multipart so the existing request() helper can send it. The file is
+// written under data/uploads and served from /uploads, which img tags can load without a
+// bearer token — the same local-only tradeoff as GET /api/auth/operators.
+router.post('/:id/image', (req, res) => {
+    try {
+        const item = saveMenuItemImage(req.params.id, req.body.data_url);
+        res.json(forRole(req, 'menuItem', item));
     } catch (err) {
         res.status(400).json({ error: err.message });
     }

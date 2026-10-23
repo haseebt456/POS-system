@@ -34,10 +34,27 @@ router.post('/', (req, res) => {
 });
 
 // GET /api/purchases  — the whole history, newest first.
-// Declared before /:id and /supplier/... so the literal paths win over the param route.
 router.get('/', (req, res) => {
     try {
         res.json(getAllPurchases());
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Literal /supplier/... must be declared before /:id. Otherwise GET /purchases/supplier/1
+// is read as "purchase whose id is the string supplier".
+router.get('/supplier/:supplier_id/payments', (req, res) => {
+    try {
+        res.json(getPaymentsForSupplier(req.params.supplier_id));
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+router.get('/supplier/:supplier_id', (req, res) => {
+    try {
+        res.json(getPurchasesForSupplier(req.params.supplier_id));
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
@@ -49,24 +66,6 @@ router.get('/:id', (req, res) => {
         const purchase = getPurchaseWithItems(req.params.id);
         if (!purchase) return res.status(404).json({ error: 'Purchase not found' });
         res.json(purchase);
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-});
-
-// GET /api/purchases/supplier/:supplier_id  — all purchases for one supplier
-router.get('/supplier/:supplier_id', (req, res) => {
-    try {
-        res.json(getPurchasesForSupplier(req.params.supplier_id));
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-});
-
-// GET /api/purchases/supplier/:supplier_id/payments  — all payments for one supplier
-router.get('/supplier/:supplier_id/payments', (req, res) => {
-    try {
-        res.json(getPaymentsForSupplier(req.params.supplier_id));
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
