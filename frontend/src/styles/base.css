@@ -1,0 +1,119 @@
+/* Base layer: reset, element defaults, and the two utility classes that were
+ * cheaper as classes than as components.
+ *
+ * Imported once from main.jsx, after tokens.css.
+ */
+
+/* The app has never had a box-sizing reset, which is why every component sizes its
+ * controls by hand (padding computed against width, flex-basis picked to leave room
+ * for the border). border-box is the sane default and makes the token spacing mean
+ * what it says.
+ *
+ * This is the one change in the foundation step that can move pixels app-wide, so it
+ * is deliberately its own commit. */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-sans);
+  font-size: var(--text-md);
+  line-height: var(--leading-normal);
+  color: var(--text);
+  background: var(--page);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Buttons and inputs do NOT inherit the page font by default — they get the OS
+ * control font instead. That is why the tab bar has been rendering in Arial rather
+ * than the Segoe UI the root div sets. */
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+}
+
+pre,
+code {
+  font-family: var(--font-mono);
+}
+
+/* Components set their own heading sizes; the browser defaults (2em, 1.5em...) would
+ * fight them. Margins are zeroed here and re-added explicitly where wanted. */
+h1,
+h2,
+h3,
+h4,
+p {
+  margin: 0;
+}
+
+/* One focus treatment for the whole app. Replaces `outline: 'none'`, which several
+ * form files set inline and which removed the focus indicator entirely — a keyboard
+ * user had no way to tell where they were.
+ *
+ * :focus-visible (not :focus) so a mouse click doesn't leave a ring behind.
+ *
+ * No border-radius here. Outlines already follow whatever radius the element has, so
+ * setting one only overrides it — and it made every input and button visibly change
+ * shape while focused, from 8px to 6px. */
+:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
+}
+
+/* ---------------------------------------------------------------------------
+ * Utilities
+ *
+ * These two are used on a bare <p> or <div> in a dozen places. A styled element is
+ * cheaper than a component import when there is nothing to parameterise.
+ * ------------------------------------------------------------------------- */
+
+/* The standard screen container. Previously each screen picked its own padding, and
+ * two of them capped width at 900px while the other three didn't — so the left edge
+ * of the content moved when you changed tabs. */
+.page {
+  padding: var(--space-6) var(--page-gutter);
+  max-width: var(--page-max-width);
+  margin-inline: auto;
+}
+
+/* Vertical rhythm for a screen's stack of blocks. Every screen is a column of panels,
+   banners and headers with an even gap; expressing that once here means no component has
+   to carry an opinionated margin-bottom, which is how the old code ended up with a
+   different spacing value at every call site. */
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+/* "Nothing here yet" copy. */
+.empty {
+  font-size: var(--text-md);
+  color: var(--text-subtle);
+}
+
+.muted {
+  font-size: var(--text-md);
+  color: var(--text-muted);
+}

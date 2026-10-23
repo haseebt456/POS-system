@@ -1,0 +1,17 @@
+/* The shell's layout moved to components/layout/AppShell.module.css, next to the component
+ * that owns it. What is left here is the one state that renders before any shell exists.
+ */
+
+/* Shown while the stored session is being checked. Deliberately not a spinner: on a local
+   SQLite backend this resolves in a few milliseconds, and a spinner that appears for one
+   frame reads as a flicker. A quiet line of text is enough, and if the backend is down
+   this is what stays on screen while the request times out. */
+.boot {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  background: var(--page);
+  color: var(--text-subtle);
+  font-size: var(--text-md);
+}

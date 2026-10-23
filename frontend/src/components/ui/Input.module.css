@@ -1,0 +1,45 @@
+.control {
+  width: 100%;
+  /* Without this a control inside a grid/flex cell refuses to shrink below its
+     content width and pushes the layout out. */
+  min-width: 0;
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--text-md);
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.control::placeholder {
+  color: var(--text-subtle);
+}
+
+/* The original code set outline: 'none' on inputs, which removed the focus indicator
+   entirely — on a keyboard-driven till there was no way to tell which field you were in.
+
+   This keeps the global :focus-visible ring from base.css rather than replacing it. A
+   2px offset outline is the indicator a keyboard user already scans for, and it should
+   look identical on a text field and on a button. The border colour change is an extra
+   cue on top of the ring, not a substitute for it. */
+.control:focus-visible {
+  border-color: var(--brand);
+}
+
+.control:disabled {
+  background: var(--surface-sunken);
+  color: var(--text-subtle);
+}
+
+.invalid {
+  border-color: var(--danger-solid);
+  background: var(--danger-bg);
+}
+
+/* `.control:focus-visible` is two classes deep and would otherwise repaint an invalid
+   field's border in the brand colour the moment it was focused — the error would appear
+   to clear while the operator was fixing it. */
+.invalid:focus-visible {
+  border-color: var(--danger-solid);
+}

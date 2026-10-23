@@ -1,0 +1,62 @@
+/* The border and radius live on a wrapper rather than on <table> itself. The original
+   code put them on the table with border-collapse: separate, which meant the last row's
+   bottom border sat on top of the rounded edge. On a wrapper they compose cleanly and a
+   wide table can scroll instead of overflowing. */
+.wrapper {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--text-base);
+}
+
+.th {
+  padding: var(--space-3) var(--space-4);
+  text-align: left;
+  vertical-align: middle;
+  background: var(--surface-raised);
+  border-bottom: 1px solid var(--border);
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+.td {
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--border-subtle);
+  color: var(--text);
+  vertical-align: middle;
+}
+
+/* The wrapper's border already closes the table; a rule right above it reads as a
+   mistake. */
+.table tbody tr:last-child .td {
+  border-bottom: none;
+}
+
+/* Scanning a dense table is easier when the row under the cursor lights up. Impossible
+   with inline styles, which is half the reason this pass exists. */
+.table tbody tr:hover {
+  background: var(--surface-hover);
+}
+
+.left {
+  text-align: left;
+}
+
+.right {
+  text-align: right;
+}
+
+.center {
+  text-align: center;
+}

@@ -1,0 +1,56 @@
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-bold);
+  line-height: 1.6;
+  padding: 0 var(--space-2);
+  border-radius: var(--radius-pill);
+  white-space: nowrap;
+}
+
+/* The "Deal" tag on a menu card and the KITCHEN/RECEIPT tags are labels rather than
+   status pills — squarer and louder, so they read as a category, not a state. */
+.square {
+  border-radius: var(--radius-sm);
+  padding: 2px var(--space-2);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.neutral {
+  background: var(--surface-hover);
+  color: var(--text-muted);
+}
+
+.ok {
+  background: var(--ok-bg);
+  color: var(--ok-text);
+}
+
+.warn {
+  background: var(--warn-bg);
+  color: var(--warn-text);
+}
+
+.danger {
+  background: var(--danger-bg);
+  color: var(--danger-text);
+}
+
+.info {
+  background: var(--info-bg);
+  color: var(--info-text);
+}
+
+.brand {
+  background: var(--brand-subtle);
+  color: var(--brand-hover);
+}
+
+.deal {
+  background: var(--deal-bg);
+  color: var(--deal-text);
+  border: 1px solid var(--deal-accent);
+}

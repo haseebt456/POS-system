@@ -1,0 +1,92 @@
+/* The right-hand slide-over. See SlideOver.jsx for why the app uses this instead of a centred
+   modal, and for the focus behaviour that goes with it. */
+
+.scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: flex;
+  justify-content: flex-end;
+  background: rgba(0, 0, 0, 0.55);
+  /* The panel is a fixed overlay; without this the wheel still scrolls the page behind it. */
+  overscroll-behavior: contain;
+  animation: fade var(--transition-fast);
+}
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  width: min(420px, 100vw);
+  height: 100%;
+  background: var(--surface);
+  border-left: 1px solid var(--border);
+  box-shadow: var(--shadow-md);
+  outline: none;
+  animation: slide-in var(--transition-fast);
+}
+
+/* A real animation rather than a transition on a mounted class: this element is created
+   already open, so there is no previous state for a transition to move away from. */
+@keyframes slide-in {
+  from {
+    transform: translateX(24px);
+    opacity: 0;
+  }
+}
+
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+}
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.heading {
+  min-width: 0;
+}
+
+.title {
+  margin: 0;
+  font-size: var(--text-lg);
+  font-weight: var(--weight-semibold);
+  color: var(--text);
+}
+
+.subtitle {
+  margin: var(--space-1) 0 0;
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+}
+
+/* The one scrolling region. The header and the footer stay put, so the primary action is
+   always where the operator left it however long the form is. */
+.body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: var(--space-4);
+}
+
+.footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  border-top: 1px solid var(--border-subtle);
+  background: var(--surface);
+}
+
+@media (max-width: 620px) {
+  .panel {
+    width: 100vw;
+    border-left: none;
+  }
+}

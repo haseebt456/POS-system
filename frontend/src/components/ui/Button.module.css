@@ -1,0 +1,110 @@
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  font-weight: var(--weight-semibold);
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  white-space: nowrap;
+  transition: background-color var(--transition-fast), border-color var(--transition-fast),
+    color var(--transition-fast);
+}
+
+/* Disabled state is opacity, not a hand-mixed lighter tint. The previous code picked
+   --a8c5f5 and #a7d8b8 by hand, which silently stops matching the moment the base
+   colour changes. */
+.btn:disabled {
+  opacity: 0.55;
+}
+
+.md {
+  padding: 9px var(--space-4);
+  font-size: var(--text-md);
+}
+
+.sm {
+  padding: var(--space-1) var(--space-2);
+  font-size: var(--text-base);
+}
+
+/* The till's one full-width action — Submit Order. Deliberately larger than md: across a
+   counter it has to be findable at a glance, without reading. */
+.lg {
+  padding: var(--space-3) var(--space-5);
+  font-size: var(--text-lg);
+}
+
+/* Square, for a button whose label is a single glyph — the cart's − and + steppers.
+   md's horizontal padding would make those wide and short, and a quantity stepper reads
+   as a pair of small squares either side of the number. */
+.icon {
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  font-size: var(--text-md);
+}
+
+/* Spans its container. The login screen's Sign in and the POS rail's Submit Order are
+   the only actions in their column, and a button that stops short of the edge reads as
+   optional. */
+.full {
+  width: 100%;
+}
+
+.primary {
+  background: var(--brand);
+  /* Dark, not white. The brand is a light pink now, and white on #f7b8cd is about
+     1.6:1 — the label would be a smudge. */
+  color: var(--on-brand);
+}
+.primary:hover:not(:disabled) {
+  background: var(--brand-hover);
+}
+
+/* The till's "Submit Order" — a deliberate green, kept from the original. With a red
+   brand accent, a red primary action would read as destructive. */
+.success {
+  background: var(--ok-solid);
+  color: #fff;
+}
+/* Its own hover value rather than --ok-text. That token is now a bright foreground for
+   text on dark, and using it as a button fill would turn hover into a near-white flash. */
+.success:hover:not(:disabled) {
+  background: var(--ok-solid-hover);
+}
+
+.danger {
+  background: var(--danger-solid);
+  color: #fff;
+}
+.danger:hover:not(:disabled) {
+  background: var(--danger-solid-hover);
+}
+
+.secondary {
+  background: var(--surface);
+  color: var(--text-muted);
+  border-color: var(--border-strong);
+}
+.secondary:hover:not(:disabled) {
+  background: var(--surface-hover);
+  color: var(--text);
+}
+
+/* The old `linkButton` — text-only, used for row actions in tables. */
+.ghost {
+  background: none;
+  color: var(--brand);
+}
+.ghost:hover:not(:disabled) {
+  background: var(--brand-subtle);
+}
+
+.dangerGhost {
+  background: none;
+  color: var(--danger-solid);
+}
+.dangerGhost:hover:not(:disabled) {
+  background: var(--danger-bg);
+}

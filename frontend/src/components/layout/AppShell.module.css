@@ -1,0 +1,47 @@
+/* The app shell is a fixed-height row, not a normally-scrolling document.
+ *
+ * Before this the root was just `minHeight: 100vh` and the page grew with its content.
+ * On the till that meant a busy lunch rush pushed Pending Orders downwards until Submit
+ * Order — the most-clicked control in the app — was below the fold on a 900x600 screen.
+ * Pinning the shell to the viewport and handing each screen the remainder makes every
+ * screen decide what scrolls and what stays put.
+ */
+.shell {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+  background: var(--page);
+}
+
+/* The window gap around the floating sidebar panel lives here rather than as a margin on
+   the panel, so the collapse breakpoint has exactly one place to change the width. */
+.sidebarSlot {
+  flex: none;
+  width: var(--sidebar-width);
+  padding: var(--space-3);
+}
+
+/* min-width: 0 is load-bearing. A flex item defaults to min-width: auto, which means
+   "never shrink below my content" — so the till's widest product name would widen this
+   column and squeeze the cart rail instead of wrapping. min-height: 0 does the same job
+   vertically and is what stops the pane growing past the viewport. */
+.main {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+/* Screens that manage their own scrolling internally, so nothing scrolls here. The till
+   is the one: a static rail beside a menu column whose regions each scroll separately. */
+.mainFill {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+@media (max-width: 1100px) {
+  .sidebarSlot {
+    width: var(--sidebar-width-collapsed);
+  }
+}

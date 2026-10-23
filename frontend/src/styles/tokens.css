@@ -1,0 +1,179 @@
+/* Design tokens for the POS.
+ *
+ * Every value here replaced an ad-hoc hex in one of the component files: the frontend
+ * had 270 colour literals across 36 distinct values (mostly Tailwind's default palette
+ * picked by hand), 8 font sizes clustered between 10 and 16px, and 11 different spacing
+ * numbers. These are the same values, named once so they can be changed once.
+ *
+ * Tokens are for values used in more than one place. A one-off number stays in the
+ * component's own module — not everything needs to be a variable.
+ *
+ * ---
+ * Dark theme. The palette is taken from the COSYPOS reference frames; see
+ * frontend/DESIGN.md for the reading of them and for what is deliberately not copied.
+ *
+ * The names below are unchanged from the light theme on purpose. Every component in the
+ * app reaches colour through these variables and none of them hard-code a value, so the
+ * swap from light to dark is this file and nothing else. Keep it that way.
+ */
+
+:root {
+  /* ---- Surfaces ----------------------------------------------------------
+   * A five-step ramp from the window down to a recessed field. "Raised" and "sunken"
+   * invert their light-theme meaning: on dark, a panel that sits above another is
+   * LIGHTER, and an input reads as a field because it is lighter than the card holding
+   * it, not darker. */
+  --page: #121212;            /* app background, behind everything */
+  --surface: #1c1c1c;         /* panels, tables, the sidebar */
+  --surface-raised: #242424;  /* cards and table headers sitting on --surface */
+  --surface-sunken: #2e2e2e;  /* input fills, keypad keys, recessed areas */
+  --surface-hover: #2a2a2a;   /* row and secondary-button hover */
+
+  /* ---- Borders -----------------------------------------------------------
+   * On a dark page a hairline does the work a shadow does on a light one. */
+  --border: #333333;          /* default panel / divider */
+  --border-strong: #4a4a4a;   /* form controls */
+  --border-subtle: #262626;   /* table row rules — quieter than --border */
+
+  /* ---- Text --------------------------------------------------------------
+   * Three steps, not the previous five. Dark themes fail contrast more easily than
+   * light ones, so these are the floor, not a starting point: --text-subtle is the
+   * lightest grey still readable on --surface, and nothing lighter belongs in copy. */
+  --text: #f2f2f2;            /* headings, table cells, values */
+  --text-muted: #a3a3a3;      /* labels, secondary copy */
+  --text-subtle: #707070;     /* meta, placeholders, empty states */
+
+  /* ---- Brand -------------------------------------------------------------
+   * The soft pink is a SURFACE colour: it fills buttons and active nav pills. Text on
+   * top of it is dark, which is what --on-brand is for — white on #f7b8cd is about
+   * 1.6:1 and unreadable. */
+  --brand: #f7b8cd;
+  --brand-hover: #fbc9da;
+  --brand-subtle: rgba(247, 184, 205, 0.15);
+  --brand-border: rgba(247, 184, 205, 0.4);
+  --on-brand: #1a1a1a;
+
+  /* ---- Status ------------------------------------------------------------
+   * Two families, and they are not interchangeable.
+   *
+   * The -bg / -text / -border triple is a translucent tint with a BRIGHT foreground.
+   * It has to be, because these get used two ways in this codebase: as a badge, where
+   * the text sits on its own -bg, and as standalone text on --surface (StationList,
+   * StockCountPanel, PendingOrdersList). Under the light theme a single dark value
+   * served both. On dark it cannot — a dark green on #1c1c1c is invisible — so the
+   * foreground is the bright variant and the background is a tint of it. One set of
+   * names, correct at every call site.
+   *
+   * The -solid pair is for filled buttons, where the background is saturated and the
+   * label is white. Those carry their own hover value rather than reusing -text. */
+  --ok-solid: #1f9d55;
+  --ok-solid-hover: #178045;
+  --ok-bg: rgba(63, 185, 110, 0.16);
+  --ok-text: #5cd48d;
+  --ok-border: rgba(92, 212, 141, 0.35);
+
+  --warn-solid: #d98324;
+  --warn-solid-hover: #b86c18;
+  --warn-bg: rgba(240, 190, 90, 0.16);
+  --warn-text: #f0c05a;
+  --warn-bg-subtle: rgba(240, 190, 90, 0.09);  /* whole-row tint, e.g. a low-stock ingredient */
+  --warn-border: rgba(240, 192, 90, 0.34);
+
+  --danger-solid: #d64541;
+  --danger-solid-hover: #b53936;
+  --danger-bg: rgba(240, 110, 105, 0.16);
+  --danger-text: #f08a85;
+  --danger-border: rgba(240, 138, 133, 0.34);
+
+  --info-bg: rgba(110, 170, 240, 0.16);
+  --info-text: #7db4f0;
+  --info-border: rgba(125, 180, 240, 0.34);
+
+  /* Deals get their own accent so they read as a different kind of thing from a
+   * plain menu item, without competing with the brand colour. --deal-text doubles as
+   * a border colour in MenuGrid, so it has to be a solid value, not a tint. */
+  --deal-text: #f5c451;
+  --deal-accent: #fbbf24;
+  --deal-border: rgba(251, 191, 36, 0.28);
+  --deal-bg: rgba(251, 191, 36, 0.1);
+
+  /* ---- Data visualisation -------------------------------------------------
+   * Deliberately separate from --brand. The soft pink is a surface colour and vanishes
+   * as a 2px chart stroke; these are the saturated end of the same family. Assigned in
+   * order — series 1 is always --chart-1 — so a given metric keeps its colour across
+   * every chart on every screen. */
+  --chart-1: #ff4fa3;
+  --chart-2: #7db4f0;
+  --chart-3: #5cd48d;
+  --chart-4: #f0c05a;
+  --chart-grid: rgba(255, 255, 255, 0.08);
+  --chart-axis: #707070;
+
+  /* ---- Type scale --------------------------------------------------------
+   * Seven steps with real jumps, replacing eight sizes packed into 10-16px where
+   * 14 was the default almost everywhere and nothing looked more important than
+   * anything else.
+   *   base  table density — the dense interior of data tables
+   *   md    anything interactive: inputs, buttons, list rows */
+  --text-xs: 11px;    /* badges only */
+  --text-sm: 12px;    /* table column heads, meta lines */
+  --text-base: 13px;  /* table cells */
+  --text-md: 14px;    /* controls, list rows, form labels */
+  --text-lg: 16px;    /* panel headings, grid cards */
+  --text-xl: 20px;    /* section headings */
+  --text-2xl: 24px;   /* page titles */
+
+  --weight-normal: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+
+  --leading-tight: 1.25;
+  --leading-normal: 1.5;
+
+  /* ---- Spacing -----------------------------------------------------------
+   * 4px scale. Previously 4,6,8,10,12,14,16,18,20,24,28 all appeared. */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+
+  /* ---- Radius ------------------------------------------------------------
+   * Rounder than the light theme's. The reference leans on generous corner radii as a
+   * signature, and a data-dense app can afford it because the density is in the type
+   * and the row height, not in tight corners. */
+  --radius-sm: 8px;    /* badges, small controls */
+  --radius-md: 10px;   /* buttons, inputs */
+  --radius-lg: 16px;   /* panels, tables, cards */
+  --radius-xl: 22px;   /* the sidebar panel, large cards */
+  --radius-pill: 999px;
+
+  /* ---- Elevation ---------------------------------------------------------
+   * Deliberately restrained — this is a data-dense app, not a marketing page.
+   * Panels get a hairline, not a shadow, and on a dark page a shadow reads as
+   * nothing at all. Reserved for things that genuinely float: modals and toasts. */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.45);
+
+  /* ---- Layout ------------------------------------------------------------ */
+  --sidebar-width: 208px;              /* expanded */
+  --sidebar-width-collapsed: 72px;     /* icons only, below 1100px */
+  --page-max-width: 1440px;
+  --page-gutter: var(--space-6);
+
+  /* ---- Misc -------------------------------------------------------------- */
+  --font-sans: "Segoe UI", system-ui, -apple-system, sans-serif;
+  --font-mono: Consolas, "Courier New", monospace;
+
+  --transition-fast: 120ms ease;
+}
+
+/* Honour the OS setting. The app has no motion of its own beyond short transitions and
+ * a slide-over, but those are exactly the things that cause trouble. */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --transition-fast: 0ms;
+  }
+}

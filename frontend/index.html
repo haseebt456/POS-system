@@ -4,7 +4,11 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>frontend</title>
+    <meta name="color-scheme" content="light" />
+    <!-- Matches --page in tokens.css so there is no white flash between first paint and
+         React mounting, which is noticeable on a till that starts up with the OS. -->
+    <style>html { background: #f6f7f9; }</style>
+    <title>Lucky Fast Food — POS</title>
   </head>
   <body>
     <div id="root"></div>

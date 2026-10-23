@@ -1,0 +1,61 @@
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  padding: var(--space-4) var(--space-5);
+}
+
+/* There used to be a `.panel + .panel { margin-top }` rule here. It's gone on purpose:
+   every screen now wraps its panels in `.stack`, which supplies the gap, and the two
+   mechanisms stacked — adjacent panels ended up 36px apart while a panel following a
+   banner was 16px away. One mechanism, not two. */
+
+/* For a panel holding full-bleed content — a list whose rows carry their own padding,
+   or a table that should meet the border. Set via the `flush` prop rather than a
+   className from outside, because a passed-in padding class and this one would both be
+   the `padding` shorthand and the winner would depend on stylesheet order. */
+.flush {
+  padding: 0;
+  overflow: hidden;
+}
+
+/* Deals read as a different kind of thing from a plain menu item, so their panel is
+   tinted. Like `flush`, this is a prop rather than a caller className: `.deal` and
+   `.panel` both set `background` and `border-color`, and across two modules the winner
+   would depend on stylesheet order. Inside one module it's decided by source order. */
+.deal {
+  border-color: var(--deal-accent);
+  background: var(--deal-bg);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-bottom: var(--space-3);
+  /* Only has an effect when a consumer makes the panel a flex column (Cart, Pending
+     orders). It matters there: without it the title and the footer share the job of
+     absorbing any overflow with the scrolling region between them, and a long cart
+     squashes its own heading instead of just scrolling. The header is a title — it
+     should never be the thing that gives. */
+  flex: none;
+}
+
+.flush .header {
+  padding: var(--space-4) var(--space-5) 0;
+  margin-bottom: 0;
+}
+
+.title {
+  font-size: var(--text-lg);
+  font-weight: var(--weight-bold);
+  color: var(--text);
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
